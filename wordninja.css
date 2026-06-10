@@ -1,0 +1,737 @@
+:root {
+    --bg: #050607;
+    --bg-soft: #090b10;
+    --bg-elevated: #0d1017;
+    --glass: rgba(18, 21, 29, 0.72);
+    --glass-strong: rgba(24, 28, 38, 0.86);
+    --glass-soft: rgba(255, 255, 255, 0.035);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-border-strong: rgba(124, 199, 255, 0.22);
+    --text: #f4f7fb;
+    --text-soft: #c9d1dc;
+    --muted: #9aa4b2;
+    --muted-low: #687282;
+    --blue: #7cc7ff;
+    --blue-strong: #4c9dff;
+    --blue-deep: #1f6feb;
+    --blue-soft: rgba(124, 199, 255, 0.12);
+    --blue-glow: rgba(76, 157, 255, 0.22);
+    --neon-cyan: #65e6ff;
+    --neon-red: #ff4f78;
+    --neon-red-glow: rgba(255, 79, 120, 0.16);
+    --steel: #a7b0bf;
+    --blade: #d7e2f0;
+    --success: #35d39d;
+    --warning: #e6b450;
+    --danger: #ff5c6c;
+    --danger-soft: rgba(255, 92, 108, 0.12);
+    --focus-ring: rgba(124, 199, 255, 0.18);
+    --shadow-heavy: rgba(0, 0, 0, 0.58);
+    font-family: ui-rounded, "Avenir Next", "Hiragino Sans", "Yu Gothic", system-ui, -apple-system, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+    margin: 0;
+    font: inherit;
+}
+
+button {
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+}
+
+p,
+h1,
+h2,
+h3 {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+html {
+    min-height: 100%;
+    background: var(--bg);
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    line-height: 1.5;
+    color: var(--text);
+    background:
+        radial-gradient(circle at 78% 8%, rgba(72, 196, 255, 0.12), transparent 30rem),
+        radial-gradient(circle at 14% 86%, rgba(255, 79, 120, 0.07), transparent 28rem),
+        linear-gradient(135deg, #050607 0%, #070910 52%, #090b12 100%);
+    overflow-x: hidden;
+}
+
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    inset: auto;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 9999px;
+    filter: blur(70px);
+    opacity: 0.9;
+    transform: translate3d(0, 0, 0);
+}
+
+body::before {
+    width: 48rem;
+    height: 48rem;
+    top: -16rem;
+    right: -14rem;
+    background:
+        radial-gradient(circle at 42% 34%, rgba(101, 230, 255, 0.14), transparent 43%),
+        radial-gradient(circle at 64% 58%, rgba(76, 157, 255, 0.07), transparent 46%),
+        radial-gradient(circle at 30% 74%, rgba(255, 255, 255, 0.025), transparent 40%);
+    animation: auroraFloat 16s ease-in-out infinite alternate;
+}
+
+body::after {
+    width: 44rem;
+    height: 44rem;
+    left: -15rem;
+    bottom: -16rem;
+    background:
+        radial-gradient(circle at 46% 40%, rgba(255, 79, 120, 0.105), transparent 43%),
+        radial-gradient(circle at 62% 66%, rgba(93, 119, 255, 0.055), transparent 45%),
+        radial-gradient(circle at 28% 64%, rgba(255, 255, 255, 0.025), transparent 40%);
+    animation: auroraFloatReverse 20s ease-in-out infinite alternate;
+}
+
+#appShell {
+    max-width: 124rem;
+}
+
+.aurora-mesh {
+    position: fixed;
+    inset: -30%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 35% 35%, rgba(101, 230, 255, 0.06), transparent 24%),
+        radial-gradient(circle at 65% 45%, rgba(148, 163, 184, 0.04), transparent 25%),
+        radial-gradient(circle at 45% 70%, rgba(255, 79, 120, 0.04), transparent 24%);
+    filter: blur(80px);
+    animation: meshBreath 18s ease-in-out infinite alternate;
+}
+
+@keyframes auroraFloat {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to { transform: translate3d(-5rem, 4rem, 0) scale(1.12); }
+}
+
+@keyframes auroraFloatReverse {
+    from { transform: translate3d(0, 0, 0) scale(1.05); }
+    to { transform: translate3d(6rem, -3rem, 0) scale(1.18); }
+}
+
+@keyframes meshBreath {
+    from { transform: rotate(0deg) scale(1); opacity: 0.72; }
+    to { transform: rotate(8deg) scale(1.12); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+.material-symbols-rounded {
+    font-family: inherit;
+    font-weight: 600;
+    font-style: normal;
+    font-size: 1.35rem;
+    line-height: 1;
+    letter-spacing: normal;
+    display: inline-block;
+    white-space: nowrap;
+    -webkit-font-smoothing: antialiased;
+}
+
+.gemini-sparkle {
+    background: linear-gradient(135deg, var(--neon-cyan) 0%, #f8fafc 48%, var(--neon-red) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter:
+        drop-shadow(0 0 10px rgba(101, 230, 255, 0.22))
+        drop-shadow(0 0 14px rgba(255, 79, 120, 0.12));
+}
+
+.brand-icon {
+    display: block;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 0 22px rgba(101, 230, 255, 0.13),
+        0 0 28px rgba(255, 79, 120, 0.07),
+        0 12px 28px rgba(0, 0, 0, 0.42);
+}
+
+.glass-panel,
+.glass-card,
+.glass-button,
+.glass-input {
+    background:
+        linear-gradient(135deg, rgba(22, 25, 34, 0.82), rgba(9, 11, 16, 0.68)),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+        0 24px 70px var(--shadow-heavy),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(24px) saturate(135%);
+    -webkit-backdrop-filter: blur(24px) saturate(135%);
+}
+
+.glass-panel,
+.glass-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-panel::before,
+.glass-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(115deg, transparent 0%, transparent 42%, rgba(255, 255, 255, 0.045) 42.4%, transparent 43.2%),
+        linear-gradient(92deg, rgba(101, 230, 255, 0.025), transparent 18%, transparent 82%, rgba(255, 79, 120, 0.02)),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 28%);
+    opacity: 0.55;
+}
+
+.glass-card {
+    background:
+        linear-gradient(135deg, rgba(20, 24, 30, 0.9), rgba(5, 6, 8, 0.82)),
+        radial-gradient(circle at 50% 0%, rgba(123, 183, 255, 0.055), transparent 58%);
+    box-shadow:
+        0 34px 110px rgba(0, 0, 0, 0.64),
+        0 0 0 1px rgba(255, 255, 255, 0.045),
+        inset 0 1px 1px rgba(255, 255, 255, 0.09);
+}
+
+.glass-button {
+    background: rgba(255, 255, 255, 0.052);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055), 0 14px 34px rgba(0, 0, 0, 0.32);
+}
+
+.glass-button:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.082);
+    border-color: rgba(157, 204, 255, 0.18);
+}
+
+.primary-button {
+    background: linear-gradient(135deg, #77e5ff, #4c9dff 72%, #667cff);
+    color: #020409;
+    box-shadow:
+        0 16px 38px rgba(76, 157, 255, 0.24),
+        0 0 26px rgba(101, 230, 255, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.danger-button {
+    background: rgba(255, 92, 108, 0.10);
+    border: 1px solid rgba(255, 92, 108, 0.28);
+    color: #ff8a96;
+}
+
+.danger-button:hover:not(:disabled) {
+    background: rgba(255, 92, 108, 0.15);
+    border-color: rgba(255, 92, 108, 0.36);
+}
+
+.shortcut-button {
+    position: relative;
+}
+
+#gradeControls .shortcut-button {
+    display: flex;
+    min-height: 4.5rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.18rem;
+}
+
+#gradeControls.is-next-mode {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 22rem;
+}
+
+.grade-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.grade-interval {
+    color: rgba(255, 255, 255, 0.48);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.shortcut-button::after {
+    content: attr(data-shortcut);
+    position: absolute;
+    top: 0.45rem;
+    right: 0.55rem;
+    min-width: 1.15rem;
+    padding: 0.12rem 0.3rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.42);
+    background: rgba(0, 0, 0, 0.2);
+    font-size: 0.58rem;
+    line-height: 1;
+}
+
+.primary-button:disabled,
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+    box-shadow: none;
+}
+
+button {
+    transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+    min-height: 2.75rem;
+    touch-action: manipulation;
+}
+
+button:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 5px var(--focus-ring);
+}
+
+input,
+select,
+textarea {
+    color: var(--text);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: rgba(148, 163, 184, 0.54);
+}
+
+select option {
+    background: #111827;
+    color: #e5e7eb;
+}
+
+input[type="radio"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.28);
+    border-radius: 50%;
+    outline: none;
+    transition: all 0.2s ease;
+    position: relative;
+    flex: none;
+}
+
+input[type="radio"]:checked {
+    border-color: var(--blue);
+    background: var(--blue);
+    box-shadow: 0 0 16px rgba(123, 183, 255, 0.24);
+}
+
+input[type="radio"]:checked::after {
+    content: "";
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    top: 4px;
+    left: 4px;
+    border-radius: 9999px;
+    background: #fff;
+}
+
+textarea::-webkit-scrollbar {
+    width: 7px;
+}
+
+textarea::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.13);
+    border-radius: 9999px;
+}
+
+.perspective-2000 { perspective: 2000px; }
+.transform-style-3d {
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+}
+.backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    will-change: transform;
+}
+
+#studyView {
+    align-self: stretch;
+    width: 100%;
+    min-width: 0;
+}
+
+.study-toolbar,
+.flashcard-stage,
+.study-controls-shell {
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    width: calc(100vw - 2rem);
+    max-width: 56rem;
+    min-width: 0;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.flashcard-stage {
+    height: clamp(20rem, 54vh, 28rem);
+    min-height: 20rem;
+}
+
+.study-controls-shell {
+    max-width: 48rem;
+}
+
+#flashcard-content {
+    display: block;
+    flex: none;
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    min-height: 20rem;
+    flex: 1 1 auto;
+    transform: translateZ(0);
+    transition: box-shadow 0.2s ease;
+    will-change: transform;
+    -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+    touch-action: pan-y;
+}
+
+#cardFront,
+#cardBack {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow-wrap: anywhere;
+    pointer-events: none;
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+    transition:
+        transform 0.62s cubic-bezier(0.34, 1.56, 0.64, 1),
+        opacity 0.24s ease,
+        visibility 0.24s ease;
+    font-family: ui-rounded, "Avenir Next", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+    white-space: pre-wrap;
+}
+
+#gradeControls,
+#learnControls {
+    width: 100%;
+    min-width: 0;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#gradeControls {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+#learnControls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#studyCardActions {
+    width: 100%;
+}
+
+#cardFront {
+    opacity: 1;
+    visibility: visible;
+    transform: rotateY(0deg);
+    z-index: 2;
+    font-size: clamp(2rem, 8vw, 3.65rem);
+    letter-spacing: -0.04em;
+}
+
+#cardBack {
+    opacity: 0;
+    visibility: hidden;
+    transform: rotateY(180deg);
+    z-index: 1;
+    font-size: clamp(1.45rem, 5.5vw, 2.35rem);
+    line-height: 1.22;
+}
+
+#flashcard-content.is-flipped #cardFront {
+    opacity: 0;
+    visibility: hidden;
+    transform: rotateY(-180deg);
+    z-index: 1;
+}
+
+#flashcard-content.is-flipped #cardBack {
+    opacity: 1;
+    visibility: visible;
+    transform: rotateY(0deg);
+    z-index: 2;
+}
+
+#flashcard-content.is-resetting #cardFront {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: rotateY(0deg) !important;
+    transition: none !important;
+    z-index: 2 !important;
+}
+
+#flashcard-content.is-resetting #cardBack {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: rotateY(180deg) !important;
+    transition: none !important;
+    z-index: 1 !important;
+}
+
+.deck-row {
+    background: rgba(255, 255, 255, 0.032);
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.deck-row:hover {
+    background: rgba(255, 255, 255, 0.055);
+    border-color: rgba(157, 204, 255, 0.14);
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(2, 3, 5, 0.72);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+#appModal {
+    z-index: 60;
+}
+
+.deck-manager-card {
+    width: min(100%, 36rem);
+    max-height: min(92vh, 48rem);
+    overflow-y: auto;
+}
+
+.modal-card {
+    width: min(100%, 30rem);
+    background:
+        linear-gradient(135deg, rgba(22, 25, 34, 0.94), rgba(7, 9, 13, 0.9)),
+        radial-gradient(circle at top right, rgba(124, 199, 255, 0.08), transparent 18rem);
+    border: 1px solid var(--glass-border-strong);
+    box-shadow:
+        0 32px 90px rgba(0, 0, 0, 0.72),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    border-radius: 1.75rem;
+}
+
+.modal-input {
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    color: var(--text);
+}
+
+.modal-input:focus {
+    outline: none;
+    border-color: var(--glass-border-strong);
+    box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+#modalMessage {
+    white-space: pre-line;
+}
+
+.card-manager-list {
+    max-height: min(48vh, 28rem);
+}
+
+.card-row {
+    background: rgba(255, 255, 255, 0.032);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.card-row:hover,
+.card-row.is-selected {
+    background: rgba(124, 199, 255, 0.07);
+    border-color: rgba(124, 199, 255, 0.2);
+}
+
+.deck-row.is-archived {
+    background: rgba(255, 255, 255, 0.018);
+    border-style: dashed;
+    opacity: 0.76;
+}
+
+.onboarding-step {
+    min-height: 12rem;
+}
+
+.onboarding-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    transition: width 0.2s ease, background-color 0.2s ease;
+}
+
+.onboarding-dot.is-active {
+    width: 1.5rem;
+    background: var(--accent);
+}
+
+.hidden {
+    display: none !important;
+}
+
+@media (min-width: 1024px) {
+    #importView {
+        grid-template-columns: minmax(0, 1.55fr) minmax(25rem, 0.95fr);
+        gap: 1.5rem;
+    }
+}
+
+@media (min-width: 1600px) {
+    main {
+        padding-left: 3rem !important;
+        padding-right: 3rem !important;
+    }
+
+    #importView {
+        grid-template-columns: minmax(0, 1.65fr) minmax(30rem, 1fr);
+        gap: 1.75rem;
+    }
+}
+
+@media (max-width: 640px) {
+    main {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+
+    .glass-panel {
+        border-radius: 1.35rem !important;
+    }
+
+    .deck-row {
+        padding: 0.85rem !important;
+    }
+
+    .modal-backdrop {
+        align-items: flex-end;
+        padding: 0.5rem;
+    }
+
+    .modal-card {
+        max-height: 94dvh;
+        overflow-y: auto;
+        border-radius: 1.4rem 1.4rem 0.8rem 0.8rem;
+    }
+
+    #studyView {
+        min-height: calc(100dvh - 1.5rem);
+    }
+
+    .study-toolbar,
+    .flashcard-stage,
+    .study-controls-shell {
+        width: calc(100vw - 1.5rem);
+    }
+
+    .flashcard-stage {
+        height: clamp(19rem, 48vh, 24rem);
+        min-height: 19rem;
+    }
+
+    #flashcard-content {
+        min-height: 19rem;
+        border-radius: 1.4rem !important;
+    }
+
+    #cardFront,
+    #cardBack {
+        padding: 1.25rem !important;
+    }
+
+    #gradeControls button,
+    #learnControls button {
+        min-height: 3.5rem;
+        font-size: 0.95rem;
+    }
+
+    #gradeControls {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    #studyCardActions {
+        width: 100%;
+    }
+
+    #studyCardActions button {
+        flex: 1 1 9rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .deck-manager-card section .grid-cols-2 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
