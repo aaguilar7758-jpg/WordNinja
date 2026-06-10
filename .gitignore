@@ -1,0 +1,13 @@
+# Personal WordNinja data and backups
+*backup*.json
+*library*.json
+*study-data*.json
+*.tsv
+
+# Local development and generated workspace folders
+.DS_Store
+.codex/
+.agents/
+work/
+outputs/
+

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#050607">
+    <meta name="description" content="WordNinja turns study lists into long-term memory with focused learning and spaced review.">
+    <title>WordNinja - Spaced Repetition Flashcards</title>
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" href="./wordninja-icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="./wordninja-icon-192.png">
+    <link rel="stylesheet" href="./wordninja-utilities.css">
+    <link rel="stylesheet" href="./wordninja.css">
+</head>
+<body class="text-gray-200">
+    <div class="aurora-mesh"></div>
+
+    <main class="relative z-10 min-h-screen w-full px-4 py-5 sm:px-6 lg:px-8">
+        <div id="appShell" class="mx-auto flex min-h-[calc(100vh-2.5rem)] w-full flex-col">
+            <header id="app-header" class="mb-6 flex w-full flex-col gap-4 border-b border-white/[0.06] pb-5 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex items-center gap-3">
+                    <img class="brand-icon h-11 w-11 rounded-2xl" src="./wordninja-icon.svg" alt="" aria-hidden="true">
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h1 class="text-2xl font-semibold tracking-tight text-white">WordNinja</h1>
+                            <span class="rounded-full border border-white/[0.07] bg-white/[0.05] px-2 py-0.5 text-[11px] font-medium text-gray-400">Spaced Repetition Flashcards</span>
+                            <span class="rounded-full border border-sky-300/10 bg-sky-300/[0.03] px-2 py-0.5 text-[11px] font-medium text-sky-200">Local-first</span>
+                            <span class="rounded-full border border-white/[0.07] bg-white/[0.04] px-2 py-0.5 text-[11px] font-medium text-gray-500">Release 1.0</span>
+                        </div>
+                        <p class="mt-0.5 text-sm text-gray-500">Import vocab lists and review them over time.</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 text-xs font-medium text-gray-500">
+                    <button id="openGuideBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-4 py-2 text-xs font-medium text-gray-300">Guide</button>
+                    <button id="installAppBtn" type="button" class="glass-button hidden rounded-full border border-sky-300/10 bg-sky-300/[0.03] px-4 py-2 text-xs font-medium text-sky-100">Install App</button>
+                    <span class="material-symbols-rounded text-[18px] gemini-sparkle" aria-hidden="true">◫</span>
+                    <span id="librarySummary" aria-live="polite">0 folders / 0 decks / 0 due</span>
+                </div>
+            </header>
+
+            <section id="importView" class="grid w-full flex-1 gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.85fr)]">
+                <div class="glass-panel flex flex-col rounded-[2rem] p-5 sm:p-6">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Import</p>
+                            <h2 class="mt-1 text-2xl font-medium tracking-tight text-white">Build a deck</h2>
+                            <p class="mt-1 text-sm text-gray-500">Paste rows from spreadsheets, documents, or study list exports.</p>
+                        </div>
+                        <div class="rounded-full border border-white/[0.07] bg-white/[0.04] px-3 py-1 text-xs text-gray-400">
+                            <span id="previewCount" class="font-semibold text-sky-200">0</span> cards parsed
+                        </div>
+                    </div>
+
+                    <textarea id="importInput" aria-label="Paste study list" class="glass-input mt-5 min-h-64 w-full resize-y rounded-[1.5rem] p-5 font-mono text-sm leading-6 text-gray-100 outline-none transition focus:border-sky-300/30 focus:ring-4 focus:ring-sky-300/5" placeholder="Word 1&#9;Definition 1&#10;Word 2&#9;Definition 2"></textarea>
+
+                    <div class="mt-5 grid gap-4 md:grid-cols-2">
+                        <div class="glass-button rounded-[1.25rem] border border-white/[0.08] p-4">
+                            <label class="mb-3 block text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">Between term and definition</label>
+                            <div class="flex flex-wrap gap-4 text-sm text-gray-300">
+                                <label class="flex cursor-pointer items-center gap-2.5 transition hover:text-white">
+                                    <input type="radio" name="termDelim" value="tab" checked>
+                                    <span>Tab</span>
+                                </label>
+                                <label class="flex cursor-pointer items-center gap-2.5 transition hover:text-white">
+                                    <input type="radio" name="termDelim" value="comma">
+                                    <span>Comma</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="glass-button rounded-[1.25rem] border border-white/[0.08] p-4">
+                            <label class="mb-3 block text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">Between cards</label>
+                            <div class="flex flex-wrap gap-4 text-sm text-gray-300">
+                                <label class="flex cursor-pointer items-center gap-2.5 transition hover:text-white">
+                                    <input type="radio" name="cardDelim" value="newline" checked>
+                                    <span>New line</span>
+                                </label>
+                                <label class="flex cursor-pointer items-center gap-2.5 transition hover:text-white">
+                                    <input type="radio" name="cardDelim" value="semicolon">
+                                    <span>Semicolon</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 grid gap-4 md:grid-cols-[1fr_0.85fr]">
+                        <label class="block">
+                            <span class="mb-2 block text-xs font-medium text-gray-400">Deck name</span>
+                            <input id="deckNameInput" class="glass-input w-full rounded-2xl px-4 py-3 text-sm outline-none transition focus:border-sky-300/30 focus:ring-4 focus:ring-sky-300/5" placeholder="Japanese verbs, Biology Ch. 4, etc.">
+                        </label>
+                        <label class="block">
+                            <span class="mb-2 block text-xs font-medium text-gray-400">Folder</span>
+                            <select id="folderSelect" class="glass-input w-full rounded-2xl px-4 py-3 text-sm outline-none transition focus:border-sky-300/30 focus:ring-4 focus:ring-sky-300/5"></select>
+                        </label>
+                    </div>
+
+                    <div class="mt-4 flex flex-col gap-3 rounded-[1.25rem] border border-white/[0.06] bg-white/[0.035] p-4 sm:flex-row sm:items-center">
+                        <input id="newFolderInput" aria-label="New folder name" class="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-gray-600" placeholder="Create a new folder, e.g. Japanese">
+                        <button id="addFolderBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-4 py-2 text-sm font-medium text-gray-200">Add Folder</button>
+                    </div>
+
+                    <div class="mt-5 grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+                        <section class="rounded-[1.5rem] border border-white/[0.06] bg-white/[0.025] p-4">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <h3 class="text-sm font-medium text-white">Parsed Cards Preview</h3>
+                                    <p class="mt-1 text-xs text-gray-500">Check the front and back before saving the deck.</p>
+                                </div>
+                                <span id="parsedPreviewMeta" class="shrink-0 text-[11px] text-gray-500">No cards</span>
+                            </div>
+                            <div id="parsedPreviewList" class="mt-3 max-h-56 overflow-y-auto pr-1"></div>
+                        </section>
+
+                        <section class="rounded-[1.5rem] border border-sky-300/10 bg-sky-300/[0.025] p-4">
+                            <h3 class="text-sm font-medium text-white">Add one card manually</h3>
+                            <p class="mt-1 text-xs text-gray-500">Add a new due-now card directly to an existing deck.</p>
+                            <div class="mt-4 grid gap-3">
+                                <input id="manualCardFront" aria-label="Manual card front or term" class="glass-input w-full rounded-2xl px-4 py-3 text-sm outline-none transition focus:border-sky-300/30 focus:ring-4 focus:ring-sky-300/5" placeholder="Front / Term">
+                                <input id="manualCardBack" aria-label="Manual card back or definition" class="glass-input w-full rounded-2xl px-4 py-3 text-sm outline-none transition focus:border-sky-300/30 focus:ring-4 focus:ring-sky-300/5" placeholder="Back / Definition">
+                                <select id="manualDeckSelect" aria-label="Deck for manual card" class="glass-input w-full rounded-2xl px-4 py-3 text-sm outline-none transition focus:border-sky-300/30 focus:ring-4 focus:ring-sky-300/5"></select>
+                                <button id="addManualCardBtn" type="button" class="primary-button rounded-full px-5 py-2.5 text-sm font-semibold">Add Card</button>
+                            </div>
+                            <p id="manualCardStatus" class="mt-3 min-h-5 text-xs leading-5 text-gray-500">Save a deck first, then you can add individual cards.</p>
+                        </section>
+                    </div>
+
+                    <div class="mt-5 flex flex-col gap-4 border-t border-white/[0.06] pt-5 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h3 class="font-medium text-white">Import status</h3>
+                            <p id="previewStatus" aria-live="polite" class="mt-1 text-sm text-gray-500">Awaiting raw text block entry.</p>
+                        </div>
+                        <div class="flex flex-col gap-2 sm:flex-row">
+                            <button id="clearImportBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-5 py-3 text-sm font-medium text-gray-300">Clear</button>
+                            <button id="quickStudyBtn" type="button" disabled class="glass-button rounded-full border border-white/[0.08] px-5 py-3 text-sm font-medium text-gray-200">Quick Study</button>
+                            <button id="saveDeckBtn" type="button" disabled class="primary-button rounded-full px-6 py-3 text-sm font-semibold">Save &amp; Study</button>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="glass-panel flex min-h-[34rem] flex-col rounded-[2rem] p-5 sm:p-6">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Library</p>
+                            <h2 class="mt-1 text-xl font-medium tracking-tight text-white">Deck folders</h2>
+                        </div>
+                        <span class="material-symbols-rounded gemini-sparkle" aria-hidden="true">✦</span>
+                    </div>
+
+                    <div class="mt-5 grid grid-cols-3 gap-2">
+                        <div class="rounded-2xl border border-white/[0.06] bg-white/[0.035] p-3">
+                            <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-500">Folders</p>
+                            <p id="folderStat" class="mt-1 text-xl font-semibold text-white">0</p>
+                        </div>
+                        <div class="rounded-2xl border border-white/[0.06] bg-white/[0.035] p-3">
+                            <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-500">Decks</p>
+                            <p id="deckStat" class="mt-1 text-xl font-semibold text-white">0</p>
+                        </div>
+                        <div class="rounded-2xl border border-sky-300/10 bg-sky-300/[0.035] p-3">
+                            <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-200/70">Due</p>
+                            <p id="dueStat" class="mt-1 text-xl font-semibold text-sky-200">0</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 rounded-[1.5rem] border border-sky-300/10 bg-sky-300/[0.035] p-4">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">Daily review</p>
+                                <h3 class="mt-1 font-medium text-white">Study Today</h3>
+                                <p class="mt-1 text-xs leading-5 text-gray-500">Review the oldest due cards across all folders in one focused session.</p>
+                            </div>
+                            <div class="rounded-2xl border border-sky-300/10 bg-black/20 px-3 py-2 text-center">
+                                <p id="studyTodayCount" class="text-lg font-semibold text-sky-200">0</p>
+                                <p id="studyTodayCountLabel" class="text-[10px] font-semibold uppercase tracking-[0.14em] text-sky-200/60">due</p>
+                            </div>
+                        </div>
+                        <label class="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-white/[0.06] bg-black/20 px-3 py-2">
+                            <span>
+                                <span class="block text-xs font-medium text-gray-300">Daily session limit</span>
+                                <span id="studyTodayLimitText" class="mt-0.5 block text-[10px] text-gray-500">Up to 50 oldest due cards</span>
+                            </span>
+                            <select id="dailyReviewLimitSelect" class="glass-input w-28 rounded-2xl px-3 py-2 text-xs outline-none" aria-label="Daily review session limit">
+                                <option value="20">20 cards</option>
+                                <option value="50" selected>50 cards</option>
+                                <option value="100">100 cards</option>
+                                <option value="200">200 cards</option>
+                                <option value="0">Unlimited</option>
+                            </select>
+                        </label>
+                        <button id="studyTodayBtn" type="button" class="primary-button mt-4 w-full rounded-full px-4 py-2.5 text-sm font-semibold">Study Today</button>
+                    </div>
+
+                    <div class="mt-4 grid grid-cols-2 gap-2">
+                        <div class="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-3">
+                            <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500">Reviewed today</p>
+                            <p id="reviewedTodayStat" class="mt-1 text-lg font-semibold text-white">0</p>
+                        </div>
+                        <div class="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-3">
+                            <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500">Active cards</p>
+                            <p id="activeCardStat" class="mt-1 text-lg font-semibold text-white">0</p>
+                        </div>
+                        <div class="rounded-2xl border border-amber-300/10 bg-amber-300/[0.025] p-3">
+                            <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-200/60">Weak cards</p>
+                            <p id="weakCardStat" class="mt-1 text-lg font-semibold text-amber-200">0</p>
+                        </div>
+                        <div class="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-3">
+                            <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500">Suspended</p>
+                            <p id="suspendedCardStat" class="mt-1 text-lg font-semibold text-gray-300">0</p>
+                        </div>
+                    </div>
+
+                    <button id="studyWeakCardsBtn" type="button" class="glass-button mt-2 w-full rounded-full border border-amber-300/10 bg-amber-300/[0.025] px-4 py-2.5 text-xs font-medium text-amber-100">Review Weak Cards</button>
+
+                    <section class="mt-4 rounded-[1.5rem] border border-white/[0.06] bg-white/[0.025] p-4">
+                        <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500">Presentation tools</p>
+                        <h3 class="mt-1 text-sm font-medium text-white">Show how WordNinja works</h3>
+                        <p class="mt-1 text-[11px] leading-5 text-gray-500">Add a safe sample deck or open a short walkthrough for classroom presentations.</p>
+                        <div class="mt-3 grid grid-cols-2 gap-2">
+                            <button id="loadDemoDeckBtn" type="button" class="glass-button rounded-full border border-sky-300/10 bg-sky-300/[0.03] px-3 py-2 text-xs font-medium text-sky-100">Load Demo Deck</button>
+                            <button id="presentationGuideBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-3 py-2 text-xs font-medium text-gray-300">Presentation Guide</button>
+                        </div>
+                    </section>
+
+                    <div id="backupReminder" class="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.025] p-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500">Backup safety</p>
+                                <p id="lastBackupStat" class="mt-1 text-xs leading-5 text-gray-400">No backup exported yet</p>
+                                <p id="reviewQualityStat" class="mt-1 text-[11px] leading-5 text-gray-500">No reviews recorded today</p>
+                            </div>
+                            <span id="backupReminderBadge" class="hidden rounded-full border border-amber-300/15 bg-amber-300/[0.05] px-2 py-1 text-[10px] font-semibold text-amber-200">Recommended</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 grid grid-cols-2 gap-2">
+                        <button id="exportBackupBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-3 py-2 text-xs font-medium text-gray-300">Export Backup</button>
+                        <button id="importBackupBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-3 py-2 text-xs font-medium text-gray-300">Import Backup</button>
+                        <input id="backupFileInput" class="hidden" type="file" accept="application/json,.json">
+                    </div>
+
+                    <p class="mt-3 rounded-2xl border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-[11px] leading-5 text-gray-500">
+                        Offline ready: WordNinja’s interface and study tools are bundled locally. Export a backup before switching devices or clearing browser data.
+                    </p>
+
+                    <label class="mt-5 block">
+                        <span class="mb-2 block text-xs font-medium text-gray-400">Show folder</span>
+                        <select id="libraryFolderFilter" class="glass-input w-full rounded-2xl px-4 py-3 text-sm outline-none transition focus:border-sky-300/30 focus:ring-4 focus:ring-sky-300/5"></select>
+                    </label>
+
+                    <div class="mt-3 grid grid-cols-2 gap-2">
+                        <button id="renameFolderBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-4 py-2 text-sm font-medium text-gray-300">Rename Folder</button>
+                        <button id="deleteFolderBtn" type="button" class="glass-button rounded-full border border-red-300/10 bg-red-300/[0.025] px-4 py-2 text-sm font-medium text-red-200">Delete Empty Folder</button>
+                    </div>
+
+                    <label class="mt-3 flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.025] px-3 py-2 text-xs text-gray-400">
+                        <span id="showArchivedLabel">Show archived decks</span>
+                        <input id="showArchivedToggle" type="checkbox" class="h-4 w-4 accent-sky-300">
+                    </label>
+
+                    <div id="libraryList" class="mt-5 flex flex-1 flex-col gap-3 overflow-y-auto pr-1"></div>
+
+                    <p id="libraryStatus" aria-live="polite" class="mt-5 border-t border-white/[0.06] pt-4 text-xs leading-5 text-gray-500">Saved decks stay in this browser with a protected recovery copy.</p>
+                </aside>
+            </section>
+
+            <section id="studyView" class="hidden flex w-full flex-1 flex-col items-center">
+                <div class="study-toolbar mb-5 flex w-full max-w-4xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <button id="backToImport" type="button" class="glass-button flex items-center justify-center gap-2 rounded-full border border-white/[0.08] px-4 py-2 text-sm font-medium text-gray-300 hover:text-white">
+                        <span aria-hidden="true">&larr;</span>
+                        <span>Back to Library</span>
+                    </button>
+                    <div class="flex flex-wrap items-center gap-2 text-xs text-gray-400">
+                        <span id="activeDeckTitle" class="rounded-full border border-white/[0.07] bg-white/[0.04] px-3 py-1">No deck selected</span>
+                        <span id="studyModeLabel" class="rounded-full border border-sky-300/10 bg-sky-300/[0.035] px-3 py-1 text-sky-200">Spaced Review</span>
+                        <span id="cardProgress" aria-live="polite" class="rounded-full border border-white/[0.07] bg-white/[0.04] px-3 py-1">0 / 0</span>
+                    </div>
+                </div>
+
+                <div class="flashcard-stage perspective-2000 flex h-[min(54vh,28rem)] min-h-[20rem] w-full max-w-4xl items-center justify-center">
+                    <div id="flashcard-content" class="glass-card transform-style-3d relative h-full w-full cursor-pointer rounded-[2rem]" role="button" tabindex="0" aria-label="Flashcard. Press Space or Enter to reveal the answer." aria-pressed="false">
+                        <div id="cardFront" class="backface-hidden absolute inset-0 flex items-center justify-center p-8 text-center font-semibold text-white sm:p-12"></div>
+                        <div id="cardBack" class="backface-hidden absolute inset-0 flex items-center justify-center rounded-[2rem] bg-black/35 p-8 text-center font-medium text-slate-100 sm:p-12"></div>
+                    </div>
+                </div>
+
+                <div class="study-controls-shell mt-7 flex w-full max-w-3xl flex-col items-center gap-5">
+                    <div id="gradeControls" class="hidden grid w-full grid-cols-2 gap-3 sm:grid-cols-4">
+                        <button type="button" data-score="1" data-shortcut="1" aria-keyshortcuts="1" class="shortcut-button glass-button rounded-2xl border border-red-400/20 bg-red-500/10 py-3.5 text-sm font-medium text-red-200 hover:bg-red-500/20">Again</button>
+                        <button type="button" data-score="2" data-shortcut="2" aria-keyshortcuts="2" class="shortcut-button glass-button rounded-2xl border border-amber-400/20 bg-amber-500/10 py-3.5 text-sm font-medium text-amber-200 hover:bg-amber-500/20">Hard</button>
+                        <button type="button" data-score="3" data-shortcut="3" aria-keyshortcuts="3" class="shortcut-button glass-button rounded-2xl border border-sky-300/15 bg-sky-300/[0.06] py-3.5 text-sm font-medium text-sky-100 hover:bg-sky-300/[0.1]">Good</button>
+                        <button type="button" data-score="4" data-shortcut="4" aria-keyshortcuts="4" class="shortcut-button glass-button rounded-2xl border border-slate-300/15 bg-slate-300/[0.055] py-3.5 text-sm font-medium text-slate-100 hover:bg-slate-300/[0.09]">Easy</button>
+                    </div>
+                    <div id="learnControls" class="hidden grid w-full grid-cols-2 gap-3">
+                        <button type="button" data-learn-choice="learning" data-shortcut="1" aria-keyshortcuts="1" class="shortcut-button glass-button rounded-2xl border border-amber-400/20 bg-amber-500/10 py-3.5 text-sm font-medium text-amber-200 hover:bg-amber-500/20">Still Learning</button>
+                        <button type="button" data-learn-choice="know" data-shortcut="2" aria-keyshortcuts="2" class="shortcut-button glass-button rounded-2xl border border-sky-300/15 bg-sky-300/[0.06] py-3.5 text-sm font-medium text-sky-100 hover:bg-sky-300/[0.1]">Know</button>
+                    </div>
+                    <div id="studyCardActions" class="hidden flex flex-wrap items-center justify-center gap-2">
+                        <button id="suspendCurrentCardBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-4 py-2 text-xs font-medium text-gray-300">Suspend Card</button>
+                        <button id="markKnownCurrentCardBtn" type="button" class="glass-button rounded-full border border-sky-300/10 bg-sky-300/[0.03] px-4 py-2 text-xs font-medium text-sky-100">Mark Known</button>
+                    </div>
+                    <p id="hintText" class="text-center text-xs font-semibold uppercase tracking-[0.2em] text-gray-600">
+                        Click the card or press <kbd class="mx-1 rounded border border-white/[0.07] bg-white/[0.05] px-2 py-0.5 font-mono text-[10px] text-gray-400">Space</kbd> to reveal
+                    </p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div id="appModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalMessage">
+        <div class="modal-card p-5 sm:p-6">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p id="modalEyebrow" class="text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-200/70">WordNinja</p>
+                    <h2 id="modalTitle" class="mt-1 text-xl font-semibold tracking-tight text-white">Confirm action</h2>
+                </div>
+                <span class="material-symbols-rounded gemini-sparkle text-[20px]" aria-hidden="true">✦</span>
+            </div>
+            <p id="modalMessage" class="mt-3 text-sm leading-6 text-gray-400"></p>
+            <input id="modalInput" aria-label="Modal input" class="modal-input mt-5 hidden w-full rounded-2xl px-4 py-3 text-sm" autocomplete="off">
+            <p id="modalError" role="alert" class="mt-3 hidden text-sm text-[#ff8a96]"></p>
+            <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <button id="modalCancelBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-5 py-2.5 text-sm font-medium text-gray-300">Cancel</button>
+                <button id="modalConfirmBtn" type="button" class="primary-button rounded-full px-5 py-2.5 text-sm font-semibold">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="deckManagerModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="deckManagerTitle" aria-describedby="deckManagerMeta">
+        <div class="modal-card deck-manager-card p-5 sm:p-6">
+            <div class="flex items-start justify-between gap-4 border-b border-white/[0.06] pb-4">
+                <div class="min-w-0">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-200/70">Deck management</p>
+                    <h2 id="deckManagerTitle" class="mt-1 truncate text-xl font-semibold tracking-tight text-white">Manage deck</h2>
+                    <p id="deckManagerMeta" class="mt-1 text-sm text-gray-500"></p>
+                </div>
+                <button id="closeDeckManagerBtn" type="button" class="glass-button shrink-0 rounded-full border border-white/[0.08] px-4 py-2 text-sm font-medium text-gray-300">Close</button>
+            </div>
+
+            <div id="deckManagerStats" class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4"></div>
+
+            <section class="mt-5 rounded-[1.25rem] border border-white/[0.06] bg-white/[0.025] p-4">
+                <h3 class="text-sm font-medium text-white">Organize</h3>
+                <label class="mt-3 block">
+                    <span class="mb-2 block text-xs font-medium text-gray-400">Move to folder</span>
+                    <select id="deckManagerFolderSelect" class="modal-input w-full rounded-2xl px-4 py-3 text-sm"></select>
+                </label>
+            </section>
+
+            <section class="mt-4 rounded-[1.25rem] border border-white/[0.06] bg-white/[0.025] p-4">
+                <h3 class="text-sm font-medium text-white">Manage deck</h3>
+                <div class="mt-3 grid grid-cols-2 gap-2">
+                    <button id="manageDeckCardsBtn" type="button" class="primary-button rounded-2xl px-4 py-3 text-sm font-semibold">Manage Cards</button>
+                    <button id="renameManagedDeckBtn" type="button" class="glass-button rounded-2xl border border-white/[0.08] px-4 py-3 text-sm font-medium text-gray-200">Rename</button>
+                    <button id="copyManagedDeckBtn" type="button" class="glass-button rounded-2xl border border-white/[0.08] px-4 py-3 text-sm font-medium text-gray-200">Copy</button>
+                    <button id="exportManagedDeckBtn" type="button" class="glass-button rounded-2xl border border-white/[0.08] px-4 py-3 text-sm font-medium text-gray-200">Export Deck</button>
+                    <button id="reverseManagedDeckBtn" type="button" class="glass-button rounded-2xl border border-sky-300/10 bg-sky-300/[0.03] px-4 py-3 text-sm font-medium text-sky-100">Reverse Cards</button>
+                    <button id="archiveManagedDeckBtn" type="button" class="glass-button rounded-2xl border border-white/[0.08] px-4 py-3 text-sm font-medium text-gray-200">Archive</button>
+                </div>
+            </section>
+
+            <section class="mt-4 rounded-[1.25rem] border border-red-300/10 bg-red-300/[0.025] p-4">
+                <h3 class="text-sm font-medium text-red-200">Danger zone</h3>
+                <p class="mt-1 text-xs leading-5 text-gray-500">Deleting a deck removes its cards and review history. WordNinja creates a safety snapshot first.</p>
+                <button id="deleteManagedDeckBtn" type="button" class="danger-button mt-3 w-full rounded-2xl px-4 py-3 text-sm font-semibold">Delete Deck</button>
+            </section>
+        </div>
+    </div>
+
+    <div id="cardManagerModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="cardManagerTitle" aria-describedby="cardManagerMeta">
+        <div class="modal-card flex max-h-[92vh] w-[min(100%,64rem)] flex-col p-5 sm:p-6">
+            <div class="flex flex-col gap-4 border-b border-white/[0.06] pb-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-200/70">Card management</p>
+                    <h2 id="cardManagerTitle" class="mt-1 text-xl font-semibold tracking-tight text-white">Manage Cards</h2>
+                    <p id="cardManagerMeta" class="mt-1 text-sm text-gray-500">Select a card to edit, or add a new one.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button id="addManagedCardBtn" type="button" class="primary-button rounded-full px-4 py-2 text-sm font-semibold">Add Card</button>
+                    <button id="closeCardManagerBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-4 py-2 text-sm font-medium text-gray-300">Close</button>
+                </div>
+            </div>
+
+            <div class="grid min-h-0 flex-1 gap-5 pt-5 lg:grid-cols-[minmax(16rem,0.8fr)_minmax(0,1.2fr)]">
+                <div class="min-h-0">
+                    <div class="mb-3 flex items-center justify-between gap-3">
+                        <h3 class="text-sm font-medium text-white">Cards</h3>
+                        <span id="cardManagerCount" class="rounded-full border border-white/[0.07] bg-white/[0.04] px-3 py-1 text-xs text-gray-400">0 cards</span>
+                    </div>
+                    <label class="mb-3 block">
+                        <span class="sr-only">Search cards</span>
+                        <input id="cardManagerSearch" class="modal-input w-full rounded-2xl px-4 py-2.5 text-sm" placeholder="Search front or back">
+                    </label>
+                    <div id="cardManagerList" class="card-manager-list min-h-[16rem] overflow-y-auto pr-1"></div>
+                </div>
+
+                <div class="glass-panel rounded-[1.5rem] p-4">
+                    <h3 id="cardEditorTitle" class="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Edit card</h3>
+                    <label class="mt-4 block">
+                        <span class="mb-2 block text-xs font-medium text-gray-400">Front</span>
+                        <textarea id="cardEditFront" class="modal-input min-h-28 w-full resize-y rounded-2xl px-4 py-3 text-sm leading-6" placeholder="Term, question, prompt"></textarea>
+                    </label>
+                    <label class="mt-4 block">
+                        <span class="mb-2 block text-xs font-medium text-gray-400">Back</span>
+                        <textarea id="cardEditBack" class="modal-input min-h-28 w-full resize-y rounded-2xl px-4 py-3 text-sm leading-6" placeholder="Definition, answer, explanation"></textarea>
+                    </label>
+                    <p id="cardManagerStatus" class="mt-3 min-h-5 text-sm text-gray-500"></p>
+                    <div class="mt-5 flex flex-wrap items-center gap-2 border-t border-white/[0.06] pt-4">
+                        <button id="toggleSuspendManagedCardBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-4 py-2 text-sm font-medium text-gray-300">Suspend</button>
+                        <button id="markKnownManagedCardBtn" type="button" class="glass-button rounded-full border border-sky-300/10 bg-sky-300/[0.03] px-4 py-2 text-sm font-medium text-sky-100">Mark Known</button>
+                        <button id="reverseManagedCardBtn" type="button" class="glass-button rounded-full border border-sky-300/10 bg-sky-300/[0.03] px-4 py-2 text-sm font-medium text-sky-100">Create Reverse</button>
+                        <span class="flex-1"></span>
+                        <button id="deleteManagedCardBtn" type="button" class="danger-button rounded-full px-5 py-2.5 text-sm font-semibold">Delete Card</button>
+                        <button id="saveManagedCardBtn" type="button" class="primary-button rounded-full px-5 py-2.5 text-sm font-semibold">Save Card</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="onboardingModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle" aria-describedby="onboardingMessage">
+        <div class="modal-card w-[min(100%,36rem)] p-5 sm:p-7">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-200/70">Quick guide</p>
+                    <h2 id="onboardingTitle" class="mt-1 text-2xl font-semibold tracking-tight text-white">Welcome to WordNinja</h2>
+                </div>
+                <span id="onboardingIcon" class="material-symbols-rounded gemini-sparkle text-[24px]" aria-hidden="true">✦</span>
+            </div>
+            <div class="onboarding-step mt-5 rounded-[1.5rem] border border-white/[0.06] bg-white/[0.03] p-5">
+                <p id="onboardingStepLabel" class="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500">Step 1 of 3</p>
+                <h3 id="onboardingStepTitle" class="mt-2 text-lg font-medium text-white">Build your first deck</h3>
+                <p id="onboardingMessage" class="mt-2 text-sm leading-6 text-gray-400"></p>
+            </div>
+            <div class="mt-5 flex items-center justify-between gap-4">
+                <div id="onboardingDots" class="flex items-center gap-2" aria-hidden="true"></div>
+                <div class="flex flex-wrap justify-end gap-2">
+                    <button id="skipOnboardingBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-4 py-2.5 text-sm font-medium text-gray-400">Skip</button>
+                    <button id="backOnboardingBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-4 py-2.5 text-sm font-medium text-gray-300">Back</button>
+                    <button id="nextOnboardingBtn" type="button" class="primary-button rounded-full px-5 py-2.5 text-sm font-semibold">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./wordninja-app.js" defer></script>
+</body>
+</html>

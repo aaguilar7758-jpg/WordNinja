@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="WordNinja neon ninja star app icon">
+  <defs>
+    <linearGradient id="bg" x1="72" y1="44" x2="446" y2="466" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#121722"/>
+      <stop offset=".52" stop-color="#07090e"/>
+      <stop offset="1" stop-color="#020304"/>
+    </linearGradient>
+    <linearGradient id="star" x1="128" y1="116" x2="390" y2="406" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#65e6ff"/>
+      <stop offset=".42" stop-color="#f8fbff"/>
+      <stop offset=".7" stop-color="#4c9dff"/>
+      <stop offset="1" stop-color="#ff4f78"/>
+    </linearGradient>
+    <radialGradient id="hub" cx="0" cy="0" r="1" gradientTransform="translate(244 232) rotate(48) scale(105)">
+      <stop stop-color="#dffaff"/>
+      <stop offset=".38" stop-color="#4c9dff"/>
+      <stop offset="1" stop-color="#090c13"/>
+    </radialGradient>
+    <filter id="starGlow" x="-70%" y="-70%" width="240%" height="240%">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="redGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect x="18" y="18" width="476" height="476" rx="98" fill="none" stroke="#fff" stroke-opacity=".1" stroke-width="4"/>
+  <path d="M66 392c128 28 292-21 386-176" fill="none" stroke="#ff4f78" stroke-opacity=".34" stroke-width="9" stroke-linecap="round" filter="url(#redGlow)"/>
+  <path d="M68 354c141 27 290-36 375-184" fill="none" stroke="#65e6ff" stroke-opacity=".38" stroke-width="8" stroke-linecap="round" filter="url(#starGlow)"/>
+  <path d="m256 76 50 121 128-9-101 82 72 106-127-39-54 116-13-128-127 17 111-69-80-101 120 46 21-142Z" fill="none" stroke="#65e6ff" stroke-opacity=".18" stroke-width="42" stroke-linejoin="round" filter="url(#starGlow)"/>
+  <path d="m256 76 50 121 128-9-101 82 72 106-127-39-54 116-13-128-127 17 111-69-80-101 120 46 21-142Z" fill="url(#star)" stroke="#e9fbff" stroke-opacity=".5" stroke-width="5" stroke-linejoin="round"/>
+  <path d="m256 76-21 142 21 38 50-59-50-121Zm178 112-128 9-50 59 77 14 101-82Zm-29 188-72-106-77-14 22 81 127 39ZM224 453l54-116-22-81-45 69 13 128ZM84 342l127-17 45-69-61 17-111 69Zm31-170 80 101 61-17-21-38-120-46Z" fill="#020409" fill-opacity=".28"/>
+  <circle cx="256" cy="256" r="61" fill="url(#hub)" stroke="#e9fbff" stroke-opacity=".66" stroke-width="7"/>
+  <circle cx="256" cy="256" r="23" fill="#05070b" stroke="#65e6ff" stroke-width="7" filter="url(#starGlow)"/>
+  <path d="M98 414h112M75 443h84" stroke="#ff4f78" stroke-width="11" stroke-linecap="round" filter="url(#redGlow)"/>
+  <path d="M333 81h86M366 111h62" stroke="#65e6ff" stroke-width="9" stroke-linecap="round" filter="url(#starGlow)"/>
+</svg>
