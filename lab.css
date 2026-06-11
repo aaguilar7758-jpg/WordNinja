@@ -2,29 +2,72 @@
     position: sticky;
     top: 0.75rem;
     z-index: 20;
-    padding: 0.45rem;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 1.25rem;
-    background: rgba(7, 9, 13, 0.82);
-    backdrop-filter: blur(20px);
+    padding: 0.5rem;
+    border: 1px solid rgba(140, 196, 238, 0.1);
+    border-radius: 1.35rem;
+    background:
+        linear-gradient(135deg, rgba(15, 20, 27, 0.94), rgba(5, 8, 12, 0.9)),
+        radial-gradient(circle at 85% 0%, rgba(82, 175, 255, 0.08), transparent 38%);
+    box-shadow:
+        0 18px 50px rgba(0, 0, 0, 0.36),
+        inset 0 1px 0 rgba(255, 255, 255, 0.045);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
 }
 
 .lab-nav-button {
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
     min-width: 0;
-    padding: 0.7rem 0.8rem;
-    border: 1px solid transparent;
-    border-radius: 0.9rem;
-    color: #8f98a7;
+    padding: 0.76rem 0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.045);
+    border-radius: 0.95rem;
+    color: #8793a2;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0.012)),
+        rgba(5, 8, 12, 0.66);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.025),
+        0 8px 18px rgba(0, 0, 0, 0.18);
     font-size: 0.78rem;
     font-weight: 650;
-    transition: 0.2s ease;
+    letter-spacing: -0.01em;
+    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
-.lab-nav-button:hover,
+.lab-nav-button:hover {
+    border-color: rgba(124, 199, 255, 0.16);
+    color: #dceaf5;
+    background:
+        linear-gradient(180deg, rgba(124, 199, 255, 0.075), rgba(124, 199, 255, 0.025)),
+        rgba(7, 11, 16, 0.78);
+    transform: translateY(-1px);
+}
+
 .lab-nav-button.is-active {
-    border-color: rgba(124, 199, 255, 0.18);
-    color: #e8f4ff;
-    background: rgba(124, 199, 255, 0.08);
+    border-color: rgba(124, 199, 255, 0.3);
+    color: #f2f9ff;
+    background:
+        linear-gradient(135deg, rgba(65, 153, 224, 0.2), rgba(22, 72, 112, 0.13)),
+        rgba(7, 13, 20, 0.92);
+    box-shadow:
+        0 0 0 1px rgba(105, 196, 255, 0.045),
+        0 10px 25px rgba(0, 0, 0, 0.28),
+        0 0 24px rgba(76, 157, 255, 0.07),
+        inset 0 1px 0 rgba(190, 229, 255, 0.12);
+}
+
+.lab-nav-button.is-active::after {
+    content: "";
+    position: absolute;
+    right: 18%;
+    bottom: 0.3rem;
+    left: 18%;
+    height: 1px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, rgba(113, 211, 255, 0.85), transparent);
+    box-shadow: 0 0 8px rgba(82, 190, 255, 0.45);
 }
 
 .lab-view {
@@ -361,6 +404,13 @@
 @media (max-width: 520px) {
     .lab-nav {
         position: static;
+        padding: 0.4rem;
+        gap: 0.35rem;
+    }
+
+    .lab-nav-button {
+        padding: 0.68rem 0.55rem;
+        font-size: 0.72rem;
     }
 
     .dashboard-actions {
