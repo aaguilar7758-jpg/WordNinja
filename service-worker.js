@@ -1,4 +1,4 @@
-const CACHE_NAME = "wordninja-pages-v3";
+const CACHE_NAME = "wordninja-pages-v4";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -27,32 +27,26 @@ self.addEventListener("activate", event => {
   );
 });
 
+// Network-first strategy to prevent getting trapped in an old cache version
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
 
-  if (event.request.mode === "navigate") {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put("./index.html", copy));
-          return response;
-        })
-        .catch(() => caches.match("./index.html"))
-    );
-    return;
-  }
-
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        if (response.ok || response.type === "opaque") {
+    fetch(event.request)
+      .then(response => {
+        if (response.ok) {
           const copy = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
         }
         return response;
-      });
-    })
+      })
+      .catch(() => {
+        return caches.match(event.request).then(cached => {
+          if (cached) return cached;
+          if (event.request.mode === "navigate") {
+            return caches.match("./index.html");
+          }
+        });
+      })
   );
 });
