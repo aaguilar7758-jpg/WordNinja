@@ -10,7 +10,7 @@
     <link rel="icon" href="./wordninja-icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="./wordninja-icon-192.png">
     <link rel="stylesheet" href="./wordninja-utilities.css">
-    <link rel="stylesheet" href="./wordninja.css?v=20260611-4">
+    <link rel="stylesheet" href="./wordninja.css?v=20260611-5">
 </head>
 <body class="text-gray-200">
     <div class="aurora-mesh"></div>
@@ -83,7 +83,26 @@
                         </div>
                     </div>
 
-                    <div class="mt-5 grid gap-4 md:grid-cols-[1fr_0.85fr]">
+                    <div class="mt-5 rounded-[1.25rem] border border-sky-300/10 bg-sky-300/[0.025] p-4">
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">Import destination</p>
+                        <div class="mt-3 flex flex-wrap gap-4 text-sm text-gray-300">
+                            <label class="flex cursor-pointer items-center gap-2.5 transition hover:text-white">
+                                <input type="radio" name="importDestination" value="new" checked>
+                                <span>Create new deck</span>
+                            </label>
+                            <label class="flex cursor-pointer items-center gap-2.5 transition hover:text-white">
+                                <input type="radio" name="importDestination" value="existing">
+                                <span>Add to existing deck</span>
+                            </label>
+                        </div>
+                        <label id="existingDeckImportGroup" class="mt-4 hidden">
+                            <span class="mb-2 block text-xs font-medium text-gray-400">Existing deck</span>
+                            <select id="existingDeckImportSelect" class="glass-input w-full rounded-2xl px-4 py-3 text-sm outline-none transition focus:border-sky-300/30 focus:ring-4 focus:ring-sky-300/5"></select>
+                        </label>
+                        <p id="duplicateImportStatus" class="mt-3 text-xs leading-5 text-gray-500">Exact duplicate pairs will be skipped automatically.</p>
+                    </div>
+
+                    <div id="newDeckImportFields" class="mt-5 grid gap-4 md:grid-cols-[1fr_0.85fr]">
                         <label class="block">
                             <span class="mb-2 block text-xs font-medium text-gray-400">Deck name</span>
                             <input id="deckNameInput" class="glass-input w-full rounded-2xl px-4 py-3 text-sm outline-none transition focus:border-sky-300/30 focus:ring-4 focus:ring-sky-300/5" placeholder="Japanese verbs, Biology Ch. 4, etc.">
@@ -132,7 +151,7 @@
                         <div class="flex flex-col gap-2 sm:flex-row">
                             <button id="clearImportBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-5 py-3 text-sm font-medium text-gray-300">Clear</button>
                             <button id="quickStudyBtn" type="button" disabled class="glass-button rounded-full border border-white/[0.08] px-5 py-3 text-sm font-medium text-gray-200">Quick Study</button>
-                            <button id="saveDeckBtn" type="button" disabled class="primary-button rounded-full px-6 py-3 text-sm font-semibold">Save &amp; Study</button>
+                            <button id="saveDeckBtn" type="button" disabled class="primary-button rounded-full px-6 py-3 text-sm font-semibold">Create Deck &amp; Study</button>
                         </div>
                     </div>
                 </div>
@@ -462,6 +481,6 @@
         </div>
     </div>
 
-    <script src="./wordninja-app.js?v=20260611-4" defer></script>
+    <script src="./wordninja-app.js?v=20260611-5" defer></script>
 </body>
 </html>

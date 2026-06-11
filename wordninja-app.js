@@ -88,6 +88,10 @@ const previewCount = document.getElementById('previewCount');
 const previewStatus = document.getElementById('previewStatus');
 const deckNameInput = document.getElementById('deckNameInput');
 const folderSelect = document.getElementById('folderSelect');
+const newDeckImportFields = document.getElementById('newDeckImportFields');
+const existingDeckImportGroup = document.getElementById('existingDeckImportGroup');
+const existingDeckImportSelect = document.getElementById('existingDeckImportSelect');
+const duplicateImportStatus = document.getElementById('duplicateImportStatus');
 const newFolderInput = document.getElementById('newFolderInput');
 const addFolderBtn = document.getElementById('addFolderBtn');
 const parsedPreviewMeta = document.getElementById('parsedPreviewMeta');
@@ -744,6 +748,13 @@ function formatDueDate(value) {
 function bindEvents() {
     importInput.addEventListener('input', processInput);
     deckNameInput.addEventListener('input', updateImportButtons);
+    document.querySelectorAll('input[name="importDestination"]').forEach(radio => {
+        radio.addEventListener('change', updateImportDestinationUI);
+    });
+    existingDeckImportSelect.addEventListener('change', () => {
+        updateDuplicateImportStatus();
+        updateImportButtons();
+    });
 
     document.querySelectorAll('input[name="termDelim"]').forEach(radio => {
         radio.addEventListener('change', processInput);
@@ -866,7 +877,7 @@ function bindEvents() {
     suspendCurrentCardBtn.addEventListener('click', suspendCurrentStudyCard);
     markKnownCurrentCardBtn.addEventListener('click', markCurrentStudyCardKnown);
 
-    modalCancelBtn.addEventListener('click', closeModal);
+    modalCancelBtn.addEventListener('click', handleModalCancel);
     modalConfirmBtn.addEventListener('click', handleModalConfirm);
     closeDeckManagerBtn.addEventListener('click', closeDeckManager);
     deckManagerFolderSelect.addEventListener('change', () => {
@@ -1076,7 +1087,7 @@ async function installWordNinja() {
 
 function registerPwa() {
     if (!globalThis.navigator?.serviceWorker || !['http:', 'https:'].includes(globalThis.location?.protocol)) return;
-    navigator.serviceWorker.register('./service-worker.js?v=20260611-4')
+    navigator.serviceWorker.register('./service-worker.js?v=20260611-5')
         .then(registration => registration.update())
         .catch(() => {
             libraryStatus.textContent = 'Offline setup could not finish. WordNinja still works normally while connected.';
@@ -1087,6 +1098,7 @@ function openModal(options) {
     modalState = {
         type: options.type || 'confirm',
         onConfirm: options.onConfirm,
+        onCancel: options.onCancel,
         validate: options.validate,
         submitOnEnter: options.submitOnEnter !== false,
         previousFocus: document.activeElement
@@ -1159,6 +1171,13 @@ function handleModalConfirm() {
     if (typeof onConfirm === 'function') {
         onConfirm(value);
     }
+}
+
+function handleModalCancel() {
+    if (!modalState) return;
+    const onCancel = modalState.onCancel;
+    closeModal();
+    if (typeof onCancel === 'function') onCancel();
 }
 
 function showConfirmModal(options) {
@@ -1317,10 +1336,12 @@ function clearImportInput() {
     deckNameInput.value = '';
     newFolderInput.value = '';
     folderSelect.value = DEFAULT_FOLDER_ID;
+    document.querySelector('input[name="importDestination"][value="new"]').checked = true;
     parsedCache = [];
     previewCount.textContent = '0';
     previewStatus.textContent = 'Awaiting raw text block entry.';
     renderParsedPreview();
+    updateImportDestinationUI();
     updateImportButtons();
 }
 
@@ -1434,6 +1455,7 @@ function processInput() {
     }
 
     renderParsedPreview();
+    updateDuplicateImportStatus();
     updateImportButtons();
 }
 
@@ -1539,8 +1561,11 @@ function addManualCardToDeck() {
 function updateImportButtons() {
     const hasCards = parsedCache.length > 0;
     const hasName = deckNameInput.value.trim().length > 0;
+    const addingToExisting = getImportDestination() === 'existing';
+    const hasExistingDeck = Boolean(findDeck(existingDeckImportSelect.value));
     quickStudyBtn.disabled = !hasCards;
-    saveDeckBtn.disabled = !hasCards || !hasName;
+    saveDeckBtn.disabled = !hasCards || (addingToExisting ? !hasExistingDeck : !hasName);
+    saveDeckBtn.textContent = addingToExisting ? 'Add Cards to Deck' : 'Create Deck & Study';
 }
 
 function startQuickStudy() {
@@ -1554,33 +1579,132 @@ function startQuickStudy() {
     startStudying();
 }
 
+function getImportDestination() {
+    return document.querySelector('input[name="importDestination"]:checked')?.value || 'new';
+}
+
+function renderExistingDeckImportOptions() {
+    const activeDecks = library.decks.filter(savedDeck => !savedDeck.archived);
+    replaceOptions(existingDeckImportSelect, activeDecks.map(savedDeck => ({
+        value: savedDeck.id,
+        label: `${savedDeck.name} / ${folderName(savedDeck.folderId)}`
+    })));
+}
+
+function updateImportDestinationUI() {
+    const addingToExisting = getImportDestination() === 'existing';
+    newDeckImportFields.classList.toggle('hidden', addingToExisting);
+    existingDeckImportGroup.classList.toggle('hidden', !addingToExisting);
+    renderExistingDeckImportOptions();
+    updateDuplicateImportStatus();
+    updateImportButtons();
+}
+
+function getImportDuplicatePlan(targetDeck = null) {
+    const exactPairs = new Set((targetDeck?.cards || []).map(card => cardPairKey(getCardPrompt(card), getCardAnswer(card))));
+    const fronts = new Map();
+    const backs = new Map();
+    (targetDeck?.cards || []).forEach(card => {
+        fronts.set(normalizeCardSide(getCardPrompt(card)), card);
+        backs.set(normalizeCardSide(getCardAnswer(card)), card);
+    });
+
+    const candidates = [];
+    const exactDuplicates = [];
+    const similarMatches = [];
+    parsedCache.forEach(card => {
+        const pairKey = cardPairKey(card.front, card.back);
+        if (exactPairs.has(pairKey)) {
+            exactDuplicates.push(card);
+            return;
+        }
+
+        const similarCard = fronts.get(normalizeCardSide(card.front)) || backs.get(normalizeCardSide(card.back));
+        if (similarCard) {
+            similarMatches.push({ card, existingCard: similarCard });
+        }
+
+        exactPairs.add(pairKey);
+        fronts.set(normalizeCardSide(card.front), card);
+        backs.set(normalizeCardSide(card.back), card);
+        candidates.push(card);
+    });
+
+    return { candidates, exactDuplicates, similarMatches };
+}
+
+function updateDuplicateImportStatus() {
+    if (parsedCache.length === 0) {
+        duplicateImportStatus.textContent = 'Exact duplicate pairs will be skipped automatically.';
+        return;
+    }
+
+    const targetDeck = getImportDestination() === 'existing' ? findDeck(existingDeckImportSelect.value) : null;
+    const plan = getImportDuplicatePlan(targetDeck);
+    duplicateImportStatus.textContent = `${plan.candidates.length} ready / ${plan.exactDuplicates.length} exact skipped / ${plan.similarMatches.length} similar ${plan.similarMatches.length === 1 ? 'match' : 'matches'} to review`;
+}
+
+function completeBulkImport(targetDeck, plan, createsNewDeck) {
+    const importedCards = plan.candidates.map(card => createCardFromImport(card)).filter(Boolean);
+    if (importedCards.length === 0) {
+        previewStatus.textContent = 'Nothing was imported because every parsed card was an exact duplicate.';
+        return;
+    }
+
+    targetDeck.cards.push(...importedCards);
+    targetDeck.updatedAt = new Date().toISOString();
+    if (targetDeck.cards.length >= 50) library.metadata.backupRecommended = true;
+    if (createsNewDeck) library.decks.unshift(targetDeck);
+    saveLibrary();
+    renderLibrary();
+    previewStatus.textContent = `Imported ${importedCards.length} cards into "${targetDeck.name}". Skipped ${plan.exactDuplicates.length} exact duplicates.`;
+    if (createsNewDeck) studySavedDeck(targetDeck.id, 'due');
+}
+
 function saveImportedDeck() {
+    const addingToExisting = getImportDestination() === 'existing';
+    const existingDeck = addingToExisting ? findDeck(existingDeckImportSelect.value) : null;
     const name = deckNameInput.value.trim();
-    if (parsedCache.length === 0 || !name) {
+    if (parsedCache.length === 0 || (addingToExisting ? !existingDeck : !name)) {
         updateImportButtons();
         return;
     }
 
     const now = new Date().toISOString();
-    const savedDeck = {
+    const savedDeck = existingDeck || {
         id: makeId('deck'),
         folderId: folderSelect.value || DEFAULT_FOLDER_ID,
         name,
-        cards: parsedCache.map(card => createCardFromImport(card)).filter(Boolean),
+        cards: [],
         archived: false,
         archivedAt: '',
         createdAt: now,
         updatedAt: now,
         lastStudiedAt: ''
     };
-
-    library.decks.unshift(savedDeck);
-    if (savedDeck.cards.length >= 50) {
-        library.metadata.backupRecommended = true;
+    const plan = getImportDuplicatePlan(existingDeck);
+    if (plan.similarMatches.length > 0) {
+        const similarCards = new Set(plan.similarMatches.map(match => match.card));
+        const planWithoutSimilar = {
+            ...plan,
+            candidates: plan.candidates.filter(card => !similarCards.has(card)),
+            similarMatches: []
+        };
+        const examples = plan.similarMatches.slice(0, 3).map(match => {
+            return `"${match.card.front}" -> "${match.card.back}"`;
+        }).join('\n');
+        showConfirmModal({
+            title: 'Review similar cards',
+            message: `${plan.similarMatches.length} ${plan.similarMatches.length === 1 ? 'card looks' : 'cards look'} similar because the term or definition already appears.\n\n${examples}${plan.similarMatches.length > 3 ? '\n...' : ''}\n\nAdd these similar cards anyway? ${plan.exactDuplicates.length} exact duplicates will still be skipped.`,
+            confirmLabel: 'Add Similar Cards',
+            cancelLabel: 'Skip Similar',
+            onCancel: () => completeBulkImport(savedDeck, planWithoutSimilar, !existingDeck),
+            onConfirm: () => completeBulkImport(savedDeck, plan, !existingDeck)
+        });
+        return;
     }
-    saveLibrary();
-    renderLibrary();
-    studySavedDeck(savedDeck.id, 'due');
+
+    completeBulkImport(savedDeck, plan, !existingDeck);
 }
 
 function startStudyToday() {
@@ -2433,6 +2557,7 @@ function renderFolderControls(selectedFolderId = folderSelect.value || DEFAULT_F
         label: folder.name
     })));
     replaceOptions(libraryFolderFilter, filterOptions);
+    renderExistingDeckImportOptions();
 
     folderSelect.value = library.folders.some(folder => folder.id === selectedFolderId) ? selectedFolderId : DEFAULT_FOLDER_ID;
 
@@ -2538,6 +2663,9 @@ function renderLibrary() {
     libraryStatus.textContent = stats.decks === 0
         ? 'Your library is ready. Import cards or load the safe demo deck to begin.'
         : 'Choose Spaced Review for scheduling, or Flashcard Practice and Learn Mode for schedule-free studying.';
+    renderExistingDeckImportOptions();
+    updateDuplicateImportStatus();
+    updateImportButtons();
     renderManualDeckOptions();
 }
 
