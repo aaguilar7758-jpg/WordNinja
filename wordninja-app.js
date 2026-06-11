@@ -3228,6 +3228,46 @@ function gradeCard(score) {
     renderCard();
 }
 
+globalThis.WordNinjaCloudBridge = Object.freeze({
+    getLibrarySnapshot() {
+        return JSON.parse(JSON.stringify(library));
+    },
+    confirmCloudRestore(cloudPayload, cloudMetadata = {}) {
+        let restoredLibrary;
+        try {
+            restoredLibrary = normalizeLibraryPayload(cloudPayload);
+        } catch {
+            throw new Error('The cloud backup is not a valid WordNinja library.');
+        }
+
+        const deckCount = restoredLibrary.decks.length;
+        const folderCount = restoredLibrary.folders.length;
+        const backupDate = validIsoDate(cloudMetadata.backedUpAt, '');
+        const backupLabel = backupDate
+            ? new Date(backupDate).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })
+            : 'an unknown time';
+
+        showConfirmModal({
+            title: 'Restore cloud backup',
+            message: `Replace this device's local WordNinja library with the cloud backup from ${backupLabel}? It contains ${folderCount} folders and ${deckCount} decks.\n\nWordNinja will create a local safety snapshot first. Unsaved changes made on this device after that cloud backup may be replaced.`,
+            confirmLabel: 'Restore Cloud Backup',
+            danger: true,
+            onConfirm: () => {
+                saveSafetySnapshot('Before restoring replacement cloud backup');
+                library = restoredLibrary;
+                activeDeckId = '';
+                activeDeckName = '';
+                deck = [];
+                saveLibrary();
+                renderFolderControls(DEFAULT_FOLDER_ID);
+                showImportView();
+                processInput();
+                libraryStatus.textContent = 'Cloud backup restored successfully. Local study data now matches the selected cloud snapshot.';
+            }
+        });
+    }
+});
+
 document.addEventListener('DOMContentLoaded', async () => {
     bindEvents();
     await loadLibrary();

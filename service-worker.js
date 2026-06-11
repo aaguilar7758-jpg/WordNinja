@@ -1,10 +1,12 @@
-const CACHE_NAME = "wordninja-pages-v7";
+const CACHE_NAME = "wordninja-pages-v9";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./wordninja-utilities.css",
   "./wordninja.css",
   "./wordninja-app.js",
+  "./cloud-sync.js",
+  "./firebase-config.js",
   "./manifest.json",
   "./wordninja-icon.svg",
   "./wordninja-icon-192.png",
@@ -22,7 +24,7 @@ self.addEventListener("install", event => {
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
+      .then(keys => Promise.all(keys.filter(key => key.startsWith("wordninja-pages-") && key !== CACHE_NAME).map(key => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
