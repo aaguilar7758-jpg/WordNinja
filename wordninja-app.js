@@ -44,6 +44,7 @@ let deckManagerPreviousFocus = null;
 let cardManagerDeckId = '';
 let cardManagerCardId = '';
 let cardManagerSearchQuery = '';
+let cardManagerStarredOnly = false;
 let cardManagerPreviousFocus = null;
 let deferredInstallPrompt = null;
 let learnSession = null;
@@ -169,7 +170,9 @@ const cardManagerTitle = document.getElementById('cardManagerTitle');
 const cardManagerMeta = document.getElementById('cardManagerMeta');
 const cardManagerCount = document.getElementById('cardManagerCount');
 const cardManagerSearch = document.getElementById('cardManagerSearch');
+const showStarredOnlyToggle = document.getElementById('showStarredOnlyToggle');
 const cardManagerList = document.getElementById('cardManagerList');
+const studyStarredCardsBtn = document.getElementById('studyStarredCardsBtn');
 const cardEditorTitle = document.getElementById('cardEditorTitle');
 const cardEditFront = document.getElementById('cardEditFront');
 const cardEditBack = document.getElementById('cardEditBack');
@@ -179,6 +182,7 @@ const closeCardManagerBtn = document.getElementById('closeCardManagerBtn');
 const saveManagedCardBtn = document.getElementById('saveManagedCardBtn');
 const deleteManagedCardBtn = document.getElementById('deleteManagedCardBtn');
 const toggleSuspendManagedCardBtn = document.getElementById('toggleSuspendManagedCardBtn');
+const toggleStarManagedCardBtn = document.getElementById('toggleStarManagedCardBtn');
 const markKnownManagedCardBtn = document.getElementById('markKnownManagedCardBtn');
 const reverseManagedCardBtn = document.getElementById('reverseManagedCardBtn');
 const onboardingModal = document.getElementById('onboardingModal');
@@ -264,6 +268,7 @@ function normalizeCard(rawCard, nowIso = new Date().toISOString()) {
         type: typeof rawCard.type === 'string' && rawCard.type ? rawCard.type : 'basic',
         mode: typeof rawCard.mode === 'string' && rawCard.mode ? rawCard.mode : 'term-to-definition',
         reverseOf: typeof rawCard.reverseOf === 'string' ? rawCard.reverseOf : '',
+        starred: rawCard.starred === true,
         front,
         back,
         fields: {
@@ -292,6 +297,7 @@ function createCardFromImport(rawCard) {
         type: typeof rawCard.type === 'string' && rawCard.type ? rawCard.type : 'basic',
         mode: typeof rawCard.mode === 'string' && rawCard.mode ? rawCard.mode : 'term-to-definition',
         reverseOf: typeof rawCard.reverseOf === 'string' ? rawCard.reverseOf : '',
+        starred: false,
         dueDate: now,
         intervalDays: 0,
         ease: DEFAULT_EASE,
@@ -878,13 +884,19 @@ function bindEvents() {
     deleteManagedDeckBtn.addEventListener('click', () => runDeckManagerAction(deleteDeck));
     closeCardManagerBtn.addEventListener('click', closeCardManager);
     addManagedCardBtn.addEventListener('click', startNewManagedCard);
+    studyStarredCardsBtn.addEventListener('click', startStarredPractice);
     saveManagedCardBtn.addEventListener('click', saveManagedCard);
     deleteManagedCardBtn.addEventListener('click', deleteManagedCard);
+    toggleStarManagedCardBtn.addEventListener('click', toggleManagedCardStar);
     toggleSuspendManagedCardBtn.addEventListener('click', toggleManagedCardSuspension);
     markKnownManagedCardBtn.addEventListener('click', markManagedCardKnown);
     reverseManagedCardBtn.addEventListener('click', createManagedCardReverse);
     cardManagerSearch.addEventListener('input', () => {
         cardManagerSearchQuery = cardManagerSearch.value.trim().toLocaleLowerCase();
+        renderCardManager();
+    });
+    showStarredOnlyToggle.addEventListener('change', () => {
+        cardManagerStarredOnly = showStarredOnlyToggle.checked;
         renderCardManager();
     });
     cardManagerList.addEventListener('click', event => {
@@ -1064,7 +1076,7 @@ async function installWordNinja() {
 
 function registerPwa() {
     if (!globalThis.navigator?.serviceWorker || !['http:', 'https:'].includes(globalThis.location?.protocol)) return;
-    navigator.serviceWorker.register('./service-worker.js?v=20260611-3')
+    navigator.serviceWorker.register('./service-worker.js?v=20260611-4')
         .then(registration => registration.update())
         .catch(() => {
             libraryStatus.textContent = 'Offline setup could not finish. WordNinja still works normally while connected.';
@@ -2009,7 +2021,9 @@ function openCardManager(deckId, previousFocus = document.activeElement) {
     cardManagerDeckId = deckId;
     cardManagerCardId = savedDeck.cards[0]?.id || 'new';
     cardManagerSearchQuery = '';
+    cardManagerStarredOnly = false;
     cardManagerSearch.value = '';
+    showStarredOnlyToggle.checked = false;
     cardManagerModal.classList.remove('hidden');
     renderCardManager();
     window.setTimeout(() => cardManagerSearch.focus(), 0);
@@ -2022,7 +2036,9 @@ function closeCardManager() {
     cardManagerDeckId = '';
     cardManagerCardId = '';
     cardManagerSearchQuery = '';
+    cardManagerStarredOnly = false;
     cardManagerSearch.value = '';
+    showStarredOnlyToggle.checked = false;
     cardEditFront.value = '';
     cardEditBack.value = '';
     cardManagerStatus.textContent = '';
@@ -2058,10 +2074,15 @@ function renderCardManager() {
     cardManagerTitle.textContent = 'Manage Cards';
     cardManagerMeta.textContent = `${savedDeck.name} / ${folderName(savedDeck.folderId)}`;
     const stats = getDeckStats(savedDeck);
-    cardManagerCount.textContent = `${stats.totalCards} total / ${stats.activeCards} active / ${stats.suspendedCards} suspended`;
+    const starredCards = savedDeck.cards.filter(card => card.starred);
+    const activeStarredCards = starredCards.filter(card => !card.suspended);
+    cardManagerCount.textContent = `${stats.totalCards} total / ${starredCards.length} starred / ${stats.suspendedCards} suspended`;
+    studyStarredCardsBtn.disabled = savedDeck.archived || activeStarredCards.length === 0;
+    studyStarredCardsBtn.textContent = activeStarredCards.length > 0 ? `Study Starred (${activeStarredCards.length})` : 'No Starred Cards';
     cardManagerList.textContent = '';
 
     const visibleCards = savedDeck.cards.filter(card => {
+        if (cardManagerStarredOnly && !card.starred) return false;
         if (!cardManagerSearchQuery) return true;
         return `${getCardPrompt(card)} ${getCardAnswer(card)}`.toLocaleLowerCase().includes(cardManagerSearchQuery);
     });
@@ -2071,7 +2092,9 @@ function renderCardManager() {
         empty.className = 'flex min-h-[14rem] items-center justify-center rounded-[1.25rem] border border-dashed border-white/[0.09] bg-white/[0.025] p-5 text-center text-sm leading-6 text-gray-500';
         empty.textContent = savedDeck.cards.length === 0
             ? 'This deck has no cards yet. Add one manually to start studying.'
-            : 'No cards match this search.';
+            : cardManagerStarredOnly
+                ? 'No starred cards match this view. Select a card and use Star Card.'
+                : 'No cards match this search.';
         cardManagerList.appendChild(empty);
     } else {
         visibleCards.forEach(card => {
@@ -2079,14 +2102,14 @@ function renderCardManager() {
             const row = document.createElement('button');
             row.type = 'button';
             row.dataset.cardId = card.id;
-            row.className = `card-row mb-2 w-full rounded-2xl p-3 text-left ${card.id === cardManagerCardId ? 'is-selected' : ''}`;
+            row.className = `card-row mb-2 w-full rounded-2xl p-3 text-left ${card.id === cardManagerCardId ? 'is-selected' : ''} ${card.starred ? 'is-starred' : ''}`;
 
             const top = document.createElement('div');
             top.className = 'flex items-center justify-between gap-3';
 
             const title = document.createElement('p');
             title.className = 'truncate text-sm font-medium text-white';
-            title.textContent = `${index + 1}. ${getCardPrompt(card)}`;
+            title.textContent = `${card.starred ? '★ ' : ''}${index + 1}. ${getCardPrompt(card)}`;
 
             const due = document.createElement('span');
             due.className = card.suspended
@@ -2109,6 +2132,7 @@ function renderCardManager() {
             const flags = document.createElement('p');
             flags.className = 'mt-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-600';
             const cardStates = [];
+            if (card.starred) cardStates.push('Starred');
             if (card.suspended) cardStates.push('Suspended');
             if (card.known) cardStates.push('Known');
             if (isWeakCard(card)) cardStates.push('Weak');
@@ -2128,9 +2152,11 @@ function renderCardManager() {
     saveManagedCardBtn.textContent = selectedCard ? 'Save Card' : 'Add Card';
     deleteManagedCardBtn.disabled = !selectedCard;
     toggleSuspendManagedCardBtn.disabled = !selectedCard;
+    toggleStarManagedCardBtn.disabled = !selectedCard;
     markKnownManagedCardBtn.disabled = !selectedCard || selectedCard.known;
     reverseManagedCardBtn.disabled = !selectedCard;
     toggleSuspendManagedCardBtn.textContent = selectedCard?.suspended ? 'Unsuspend' : 'Suspend';
+    toggleStarManagedCardBtn.textContent = selectedCard?.starred ? 'Unstar Card' : 'Star Card';
     markKnownManagedCardBtn.textContent = selectedCard?.known ? 'Known' : 'Mark Known';
 
     if (!cardManagerStatus.textContent) {
@@ -2144,6 +2170,43 @@ function renderCardManager() {
                     : 'Editing keeps this card’s review schedule intact.'
             : 'New cards are due immediately.';
     }
+}
+
+function toggleManagedCardStar() {
+    const savedDeck = findDeck(cardManagerDeckId);
+    const card = findCard(savedDeck, cardManagerCardId);
+    if (!savedDeck || !card) return;
+
+    card.starred = !card.starred;
+    saveCardStatusChange(savedDeck);
+    cardManagerStatus.textContent = card.starred
+        ? 'Starred card. Use Study Starred for a focused practice session.'
+        : 'Removed card from starred practice.';
+    renderCardManager();
+}
+
+function startStarredPractice() {
+    const savedDeck = findDeck(cardManagerDeckId);
+    if (!savedDeck || savedDeck.archived) return;
+
+    const starredCards = savedDeck.cards.filter(card => card.starred && !card.suspended);
+    if (starredCards.length === 0) {
+        cardManagerStatus.textContent = 'Star at least one active card before starting starred practice.';
+        return;
+    }
+
+    deck = starredCards;
+    activeStudyItems = starredCards.map(card => ({
+        deckId: savedDeck.id,
+        deckName: savedDeck.name,
+        card
+    }));
+    activeDeckId = savedDeck.id;
+    activeDeckName = `${savedDeck.name} / Starred`;
+    activeStudyMode = 'starred';
+    learnSession = null;
+    closeCardManager();
+    startStudying();
 }
 
 function saveManagedCard() {
@@ -2663,6 +2726,8 @@ function renderCard() {
         ? 'Spaced Review'
         : activeStudyMode === 'all'
             ? 'Flashcard Practice'
+            : activeStudyMode === 'starred'
+                ? 'Starred Practice'
             : activeStudyMode === 'preview'
                 ? 'Preview'
                 : activeStudyMode === 'today'
@@ -2678,7 +2743,7 @@ function renderCard() {
     cardFront.textContent = getCardPrompt(deck[currentIndex]);
     cardBack.textContent = getCardAnswer(deck[currentIndex]);
 
-    const isPracticeMode = ['preview', 'all', 'practice'].includes(activeStudyMode);
+    const isPracticeMode = ['preview', 'all', 'practice', 'starred'].includes(activeStudyMode);
     gradeControls.classList.toggle('is-next-mode', isPracticeMode);
 
     if (isPracticeMode) {
@@ -3009,7 +3074,7 @@ function gradeCard(score) {
     currentIndex++;
     if (currentIndex >= deck.length) {
         const isPreview = activeStudyMode === 'preview';
-        const isPractice = ['all', 'practice'].includes(activeStudyMode);
+        const isPractice = ['all', 'practice', 'starred'].includes(activeStudyMode);
         const isToday = activeStudyMode === 'today';
         const isWeak = activeStudyMode === 'weak';
         const remainingDue = isToday ? getDueStudyItems().length : 0;
