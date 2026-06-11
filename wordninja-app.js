@@ -6,7 +6,10 @@ const DEFAULT_FOLDER_ID = 'folder-default';
 const DEFAULT_EASE = 2.5;
 const MIN_EASE = 1.3;
 const MAX_EASE = 3.2;
-const AGAIN_MINUTES = 10;
+const AGAIN_MINUTES = 0.5;
+const LEARNING_HARD_MINUTES = 6;
+const LEARNING_GOOD_MINUTES = 10;
+const NEW_EASY_INTERVAL_DAYS = 5;
 const KNOWN_INTERVAL_DAYS = 365;
 const DEFAULT_DAILY_REVIEW_LIMIT = 50;
 const DAILY_REVIEW_LIMIT_OPTIONS = [20, 50, 100, 200, 0];
@@ -2856,6 +2859,7 @@ function gradeLearnCard(choice) {
 
 function scheduleCard(card, score, now = new Date()) {
     const previousInterval = Math.max(0, numberOr(card.intervalDays, 0));
+    const previousReviews = intOr(card.reviews, 0);
     let ease = clamp(numberOr(card.ease, DEFAULT_EASE), MIN_EASE, MAX_EASE);
     let nextIntervalDays = 1;
 
@@ -2865,21 +2869,19 @@ function scheduleCard(card, score, now = new Date()) {
         card.lapses = intOr(card.lapses, 0) + 1;
     } else if (score === 2) {
         ease = clamp(ease - 0.15, MIN_EASE, MAX_EASE);
-        nextIntervalDays = intOr(card.reviews, 0) === 0
-            ? 0.5
+        nextIntervalDays = previousReviews === 0 || previousInterval < 1
+            ? LEARNING_HARD_MINUTES / (24 * 60)
+            : Math.max(1, Math.round(previousInterval * 1.2));
+    } else if (score === 3) {
+        nextIntervalDays = previousReviews === 0
+            ? LEARNING_GOOD_MINUTES / (24 * 60)
             : previousInterval < 1
                 ? 1
-                : Math.max(1, Math.round(previousInterval * 1.2));
-    } else if (score === 3) {
-        nextIntervalDays = intOr(card.reviews, 0) === 0
-            ? 1
-            : previousInterval < 1
-                ? 3
                 : Math.max(2, Math.round(previousInterval * ease));
     } else if (score === 4) {
         ease = clamp(ease + 0.15, MIN_EASE, MAX_EASE);
-        nextIntervalDays = intOr(card.reviews, 0) === 0
-            ? 4
+        nextIntervalDays = previousReviews === 0
+            ? NEW_EASY_INTERVAL_DAYS
             : previousInterval < 1
                 ? 5
                 : Math.max(4, Math.round(previousInterval * ease * 1.35));
@@ -2887,7 +2889,7 @@ function scheduleCard(card, score, now = new Date()) {
 
     card.ease = Number(ease.toFixed(2));
     card.intervalDays = Number(nextIntervalDays.toFixed(4));
-    card.reviews = intOr(card.reviews, 0) + 1;
+    card.reviews = previousReviews + 1;
     card.lastReviewedAt = now.toISOString();
     card.dueDate = score === 1
         ? addMinutes(now, AGAIN_MINUTES).toISOString()
@@ -2902,6 +2904,9 @@ function getSchedulePreview(card, score, now = new Date()) {
 
 function formatReviewInterval(intervalDays) {
     const days = Math.max(0, numberOr(intervalDays, 0));
+    if (days < 1 / (24 * 60)) {
+        return '<1 min';
+    }
     if (days < 1 / 24) {
         const minutes = Math.max(1, Math.round(days * 24 * 60));
         return `${minutes} min`;
@@ -2930,6 +2935,17 @@ function studyModeUpdatesSchedule() {
     return ['due', 'today', 'weak'].includes(activeStudyMode);
 }
 
+function requeueLearningCard(card, studyItem, score, reviewsBefore, intervalBefore) {
+    const wasLearning = reviewsBefore === 0 || intervalBefore < 1;
+    const shouldRepeat = score === 1 || (score === 2 && wasLearning) || (score === 3 && reviewsBefore === 0);
+    if (!shouldRepeat) return;
+
+    const cardsBeforeRepeat = score === 1 ? 2 : score === 2 ? 3 : 4;
+    const repeatIndex = Math.min(deck.length, currentIndex + cardsBeforeRepeat + 1);
+    deck.splice(repeatIndex, 0, card);
+    activeStudyItems.splice(repeatIndex, 0, studyItem);
+}
+
 function gradeCard(score) {
     if (isFlipAnimating) return;
     if (activeStudyMode === 'learn') return;
@@ -2939,8 +2955,16 @@ function gradeCard(score) {
     if (!currentCard) return;
 
     const updatesSchedule = studyModeUpdatesSchedule();
+    const reviewsBefore = intOr(currentCard.reviews, 0);
+    const intervalBefore = Math.max(0, numberOr(currentCard.intervalDays, 0));
+    const currentStudyItem = activeStudyItems[currentIndex] || {
+        deckId: getCurrentStudySourceDeckId(),
+        deckName: activeDeckName,
+        card: currentCard
+    };
     if (updatesSchedule) {
         scheduleCard(currentCard, score);
+        requeueLearningCard(currentCard, currentStudyItem, score, reviewsBefore, intervalBefore);
     }
 
     const sourceDeckId = getCurrentStudySourceDeckId();
