@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#050607">
-    <meta name="description" content="WordNinja turns study lists into long-term memory with focused learning and spaced review.">
-    <title>WordNinja - Spaced Repetition Flashcards</title>
+    <meta name="description" content="NinjaLearn combines focused flashcards, study conversion, reading, and listening practice.">
+    <title>NinjaLearn - Study Workspace</title>
     <link rel="manifest" href="./manifest.json">
     <link rel="icon" href="./wordninja-icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="./wordninja-icon-192.png">
     <link rel="stylesheet" href="./wordninja-utilities.css">
     <link rel="stylesheet" href="./wordninja.css?v=20260611-5">
+    <link rel="stylesheet" href="./lab.css?v=2">
 </head>
 <body class="text-gray-200">
     <div class="aurora-mesh"></div>
@@ -22,12 +23,12 @@
                     <img class="brand-icon h-11 w-11 rounded-2xl" src="./wordninja-icon.svg" alt="" aria-hidden="true">
                     <div>
                         <div class="flex flex-wrap items-center gap-2">
-                            <h1 class="text-2xl font-semibold tracking-tight text-white">WordNinja</h1>
-                            <span class="rounded-full border border-white/[0.07] bg-white/[0.05] px-2 py-0.5 text-[11px] font-medium text-gray-400">Spaced Repetition Flashcards</span>
+                            <h1 class="text-2xl font-semibold tracking-tight text-white">NinjaLearn</h1>
+                            <span class="rounded-full border border-white/[0.07] bg-white/[0.05] px-2 py-0.5 text-[11px] font-medium text-gray-400">Study Workspace</span>
                             <span class="rounded-full border border-sky-300/10 bg-sky-300/[0.03] px-2 py-0.5 text-[11px] font-medium text-sky-200">Local-first</span>
                             <span class="rounded-full border border-white/[0.07] bg-white/[0.04] px-2 py-0.5 text-[11px] font-medium text-gray-500">Release 1.0</span>
                         </div>
-                        <p class="mt-0.5 text-sm text-gray-500">Import vocab lists and review them over time.</p>
+                        <p class="mt-0.5 text-sm text-gray-500">Study today, create material, and keep progress across devices.</p>
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 text-xs font-medium text-gray-500">
@@ -37,6 +38,69 @@
                     <span id="librarySummary" aria-live="polite">0 folders / 0 decks / 0 due</span>
                 </div>
             </header>
+
+            <nav id="ninjaNav" class="lab-nav mb-5 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-7" aria-label="NinjaLearn sections">
+                <button type="button" data-ninja-view="dashboard" class="lab-nav-button is-active">Dashboard</button>
+                <button type="button" data-ninja-view="wordninja" class="lab-nav-button">WordNinja</button>
+                <button type="button" data-ninja-view="prompts" class="lab-nav-button">Prompt Library</button>
+                <button type="button" data-ninja-view="import-lab" class="lab-nav-button">Import Lab</button>
+                <button type="button" data-ninja-view="read" class="lab-nav-button">ReadNinja</button>
+                <button type="button" data-ninja-view="listen" class="lab-nav-button">ListenNinja</button>
+                <button type="button" data-ninja-view="backup" class="lab-nav-button">Backup &amp; Account</button>
+            </nav>
+
+            <section id="dashboardView" class="ninja-view w-full flex-1">
+                <div class="dashboard-hero glass-panel">
+                    <p class="lab-eyebrow">Your study dashboard</p>
+                    <h2>What do you want to study today?</h2>
+                    <p>Start with due cards, import new material, or open a focused study tool.</p>
+                </div>
+
+                <div class="dashboard-actions">
+                    <button id="dashboardReviewBtn" type="button" class="dashboard-action is-primary">
+                        <span class="dashboard-action-icon">◎</span>
+                        <span><strong>Review Due Cards</strong><small><span id="dashboardDueCount">0</span> ready now</small></span>
+                    </button>
+                    <button type="button" data-dashboard-action="import" class="dashboard-action">
+                        <span class="dashboard-action-icon">＋</span>
+                        <span><strong>Import Study Material</strong><small>Create or add to a deck</small></span>
+                    </button>
+                    <button type="button" data-dashboard-action="decks" class="dashboard-action">
+                        <span class="dashboard-action-icon">▤</span>
+                        <span><strong>Open Decks</strong><small><span id="dashboardDeckCount">0</span> active decks</small></span>
+                    </button>
+                    <button type="button" data-dashboard-action="prompts" class="dashboard-action">
+                        <span class="dashboard-action-icon">✦</span>
+                        <span><strong>Use Prompt Library</strong><small>Convert notes with ChatGPT</small></span>
+                    </button>
+                </div>
+
+                <div class="dashboard-grid">
+                    <section class="glass-panel dashboard-panel">
+                        <div class="lab-section-heading">
+                            <div><p class="lab-eyebrow">Progress</p><h3>Study overview</h3></div>
+                            <button type="button" data-ninja-view="wordninja" class="glass-button rounded-full border border-white/[0.08] px-4 py-2 text-xs">Open WordNinja</button>
+                        </div>
+                        <div class="dashboard-stat-grid">
+                            <div><span id="dashboardReviewedCount">0</span><small>Reviewed today</small></div>
+                            <div><span id="dashboardActiveCardCount">0</span><small>Active cards</small></div>
+                            <div><span id="dashboardWeakCount">0</span><small>Weak cards</small></div>
+                        </div>
+                        <div id="dashboardDeckPreview" class="dashboard-deck-preview">Your active decks will appear here.</div>
+                    </section>
+
+                    <section class="glass-panel dashboard-panel">
+                        <p class="lab-eyebrow">More ways to learn</p>
+                        <h3 class="mt-1 text-lg font-medium text-white">Focused practice</h3>
+                        <div class="dashboard-secondary-actions">
+                            <button type="button" data-ninja-view="read"><strong>ReadNinja</strong><small>Passages, cloze, and comprehension</small></button>
+                            <button type="button" data-ninja-view="listen"><strong>ListenNinja</strong><small>Scripts and browser speech practice</small></button>
+                            <button type="button" data-ninja-view="import-lab"><strong>Import Lab</strong><small>Paste structured study output</small></button>
+                        </div>
+                        <p class="dashboard-cloud-summary">Cloud: <span id="dashboardCloudStatus">Local mode</span></p>
+                    </section>
+                </div>
+            </section>
 
             <section id="importView" class="grid w-full flex-1 gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.85fr)]">
                 <div class="glass-panel flex flex-col rounded-[2rem] p-5 sm:p-6">
@@ -244,12 +308,12 @@
 
                     <button id="studyWeakCardsBtn" type="button" class="glass-button mt-2 w-full rounded-full border border-amber-300/10 bg-amber-300/[0.025] px-4 py-2.5 text-xs font-medium text-amber-100">Review Weak Cards</button>
 
-                    <section class="mt-4 rounded-[1.5rem] border border-white/[0.06] bg-white/[0.025] p-4">
+                    <section id="sampleToolsSection" class="mt-4 rounded-[1.5rem] border border-white/[0.06] bg-white/[0.025] p-4">
                         <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500">Presentation tools</p>
                         <h3 class="mt-1 text-sm font-medium text-white">Show how WordNinja works</h3>
                         <p class="mt-1 text-[11px] leading-5 text-gray-500">Add a safe sample deck or open a short walkthrough for classroom presentations.</p>
                         <div class="mt-3 grid grid-cols-2 gap-2">
-                            <button id="loadDemoDeckBtn" type="button" class="glass-button rounded-full border border-sky-300/10 bg-sky-300/[0.03] px-3 py-2 text-xs font-medium text-sky-100">Load Demo Deck</button>
+                            <button id="loadDemoDeckBtn" type="button" class="glass-button rounded-full border border-sky-300/10 bg-sky-300/[0.03] px-3 py-2 text-xs font-medium text-sky-100">Try Sample Deck</button>
                             <button id="presentationGuideBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-3 py-2 text-xs font-medium text-gray-300">Presentation Guide</button>
                         </div>
                     </section>
@@ -265,13 +329,13 @@
                         </div>
                     </div>
 
-                    <div class="mt-4 grid grid-cols-2 gap-2">
+                    <div id="fileBackupActions" class="mt-4 grid grid-cols-2 gap-2">
                         <button id="exportBackupBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-3 py-2 text-xs font-medium text-gray-300">Export Backup</button>
                         <button id="importBackupBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-3 py-2 text-xs font-medium text-gray-300">Import Backup</button>
                         <input id="backupFileInput" class="hidden" type="file" accept="application/json,.json">
                     </div>
 
-                    <section class="mt-4 rounded-[1.5rem] border border-sky-300/10 bg-sky-300/[0.025] p-4">
+                    <section id="cloudBackupSection" class="mt-4 rounded-[1.5rem] border border-sky-300/10 bg-sky-300/[0.025] p-4">
                         <div class="flex items-start justify-between gap-3">
                             <div>
                                 <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">Optional cloud backup</p>
@@ -290,7 +354,7 @@
                         <p id="cloudActionStatus" aria-live="polite" class="mt-3 min-h-5 text-[11px] leading-5 text-gray-500">Cloud actions happen only when you choose them.</p>
                     </section>
 
-                    <p class="mt-3 rounded-2xl border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-[11px] leading-5 text-gray-500">
+                    <p id="offlineSafetyNote" class="mt-3 rounded-2xl border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-[11px] leading-5 text-gray-500">
                         Offline ready: WordNinja remains local-first and works without signing in. File export/import remains available for manual backups.
                     </p>
 
@@ -313,6 +377,93 @@
 
                     <p id="libraryStatus" aria-live="polite" class="mt-5 border-t border-white/[0.06] pt-4 text-xs leading-5 text-gray-500">Saved decks stay in this browser with a protected recovery copy.</p>
                 </aside>
+            </section>
+
+            <section id="promptLibraryView" class="ninja-view hidden">
+                <div class="lab-hero glass-panel">
+                    <p class="lab-eyebrow">Prompt Library</p>
+                    <h2>Turn raw material into structured study content</h2>
+                    <p>Copy a template into ChatGPT, replace the bracketed material, then paste the formatted result into Import Lab. No API connection is used.</p>
+                </div>
+                <div id="promptTemplateList" class="lab-card-grid"></div>
+            </section>
+
+            <section id="importLabView" class="ninja-view hidden">
+                <div class="lab-two-column">
+                    <div class="glass-panel lab-panel">
+                        <p class="lab-eyebrow">Import Lab</p>
+                        <h2>Paste converted study output</h2>
+                        <p class="lab-muted">NinjaLearn recognizes tab-separated flashcards and labeled reading or listening blocks.</p>
+                        <textarea id="labImportInput" class="lab-textarea" placeholder="Paste ChatGPT output here..."></textarea>
+                        <div class="lab-action-row">
+                            <button id="analyzeLabImportBtn" type="button" class="primary-button rounded-full px-5 py-2.5 text-sm font-semibold">Analyze Output</button>
+                            <button id="clearLabImportBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-5 py-2.5 text-sm">Clear</button>
+                        </div>
+                    </div>
+                    <div class="glass-panel lab-panel">
+                        <p class="lab-eyebrow">Detected Content</p>
+                        <h3 id="labImportTitle">Nothing analyzed yet</h3>
+                        <p id="labImportSummary" class="lab-muted">The detected format and available actions will appear here.</p>
+                        <div id="labImportPreview" class="lab-preview"></div>
+                        <div id="labImportActions" class="lab-action-row hidden">
+                            <button id="sendFlashcardsBtn" type="button" class="primary-button rounded-full px-5 py-2.5 text-sm font-semibold">Send to WordNinja</button>
+                            <button id="saveReadingImportBtn" type="button" class="glass-button rounded-full border border-sky-300/10 px-5 py-2.5 text-sm">Save to ReadNinja</button>
+                            <button id="saveListeningImportBtn" type="button" class="glass-button rounded-full border border-sky-300/10 px-5 py-2.5 text-sm">Save to ListenNinja</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="readNinjaView" class="ninja-view hidden">
+                <div class="lab-two-column">
+                    <div class="glass-panel lab-panel">
+                        <p class="lab-eyebrow">ReadNinja</p><h2>Create a reading activity</h2>
+                        <input id="readingTitleInput" class="lab-input" placeholder="Passage title">
+                        <textarea id="readingPassageInput" class="lab-textarea" placeholder="Reading passage"></textarea>
+                        <textarea id="readingClozeInput" class="lab-textarea compact" placeholder="Cloze questions, one per line"></textarea>
+                        <textarea id="readingQuestionsInput" class="lab-textarea compact" placeholder="Comprehension questions, one per line"></textarea>
+                        <button id="saveReadingBtn" type="button" class="primary-button mt-4 rounded-full px-5 py-2.5 text-sm font-semibold">Save Reading Activity</button>
+                    </div>
+                    <div class="glass-panel lab-panel">
+                        <div class="lab-section-heading"><div><p class="lab-eyebrow">Reading Library</p><h3>Saved activities</h3></div><button id="clearReadingsBtn" type="button" class="glass-button rounded-full border border-red-300/10 px-4 py-2 text-xs text-red-200">Clear All</button></div>
+                        <div id="readingLibrary" class="lab-library"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="listenNinjaView" class="ninja-view hidden">
+                <div class="lab-two-column">
+                    <div class="glass-panel lab-panel">
+                        <p class="lab-eyebrow">ListenNinja</p><h2>Practice listening with browser speech</h2>
+                        <input id="listeningTitleInput" class="lab-input" placeholder="Listening activity title">
+                        <textarea id="listeningScriptInput" class="lab-textarea" placeholder="Listening script"></textarea>
+                        <label class="lab-field-label">Playback speed <span id="speechRateLabel">1.0x</span></label>
+                        <input id="speechRateInput" type="range" min="0.5" max="1.5" step="0.1" value="1">
+                        <div class="lab-action-row">
+                            <button id="playSpeechBtn" type="button" class="primary-button rounded-full px-5 py-2.5 text-sm font-semibold">Play</button>
+                            <button id="stopSpeechBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-5 py-2.5 text-sm">Stop</button>
+                            <button id="toggleTranscriptBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-5 py-2.5 text-sm">Hide Transcript</button>
+                            <button id="saveListeningBtn" type="button" class="glass-button rounded-full border border-sky-300/10 px-5 py-2.5 text-sm">Save Activity</button>
+                        </div>
+                        <div id="listeningTranscript" class="lab-transcript">Enter a script to begin.</div>
+                    </div>
+                    <div class="glass-panel lab-panel">
+                        <div class="lab-section-heading"><div><p class="lab-eyebrow">Listening Library</p><h3>Saved activities</h3></div><button id="clearListeningsBtn" type="button" class="glass-button rounded-full border border-red-300/10 px-4 py-2 text-xs text-red-200">Clear All</button></div>
+                        <div id="listeningLibrary" class="lab-library"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="backupAccountView" class="ninja-view hidden">
+                <div class="lab-hero glass-panel">
+                    <p class="lab-eyebrow">Backup &amp; Account</p>
+                    <h2>Keep progress protected</h2>
+                    <p>Cloud sync, file backups, account controls, and sample data live here so studying stays front and center.</p>
+                </div>
+                <div class="dashboard-grid mt-4">
+                    <div id="backupPrimarySlot" class="glass-panel lab-panel"></div>
+                    <div id="backupSecondarySlot" class="glass-panel lab-panel"></div>
+                </div>
             </section>
 
             <section id="studyView" class="hidden flex w-full flex-1 flex-col items-center">
@@ -500,7 +651,8 @@
         </div>
     </div>
 
-    <script src="./wordninja-app.js?v=20260611-6" defer></script>
+    <script src="./wordninja-app.js?v=20260612-1" defer></script>
     <script type="module" src="./cloud-sync.js?v=2"></script>
+    <script src="./ninjalearn-app.js?v=1" defer></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 {
-  "name": "WordNinja - Spaced Repetition Flashcards",
-  "short_name": "WordNinja",
-  "description": "Turn study lists into long-term memory with focused learning and spaced review.",
+  "name": "NinjaLearn - Study Workspace",
+  "short_name": "NinjaLearn",
+  "description": "Study flashcards, reading, and listening in one local-first learning workspace.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

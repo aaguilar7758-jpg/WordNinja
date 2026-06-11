@@ -210,7 +210,11 @@ function createEmptyLibrary() {
             reviewsSinceBackup: 0,
             backupRecommended: false,
             onboardingVersion: 0,
-            dailyReviewLimit: DEFAULT_DAILY_REVIEW_LIMIT
+            dailyReviewLimit: DEFAULT_DAILY_REVIEW_LIMIT,
+            learningWorkspace: {
+                readings: [],
+                listenings: []
+            }
         }
     };
 }
@@ -388,7 +392,15 @@ function normalizeLibraryPayload(payload) {
         reviewsSinceBackup: intOr(metadata.reviewsSinceBackup, 0),
         backupRecommended: metadata.backupRecommended === true,
         onboardingVersion: intOr(metadata.onboardingVersion, 0),
-        dailyReviewLimit: normalizeDailyReviewLimit(metadata.dailyReviewLimit)
+        dailyReviewLimit: normalizeDailyReviewLimit(metadata.dailyReviewLimit),
+        learningWorkspace: {
+            readings: Array.isArray(metadata.learningWorkspace?.readings)
+                ? metadata.learningWorkspace.readings.slice(0, 200)
+                : [],
+            listenings: Array.isArray(metadata.learningWorkspace?.listenings)
+                ? metadata.learningWorkspace.listenings.slice(0, 200)
+                : []
+        }
     };
 
     return normalized;
@@ -3231,6 +3243,31 @@ function gradeCard(score) {
 globalThis.WordNinjaCloudBridge = Object.freeze({
     getLibrarySnapshot() {
         return JSON.parse(JSON.stringify(library));
+    },
+    getDashboardSnapshot() {
+        const stats = getLibraryStats();
+        const todayStats = getTodayReviewStats();
+        return {
+            dueCards: stats.dueCards,
+            decks: stats.decks,
+            activeCards: stats.activeCards,
+            weakCards: stats.weakCards,
+            reviewedToday: todayStats.count,
+            deckNames: library.decks.filter(savedDeck => !savedDeck.archived).slice(0, 4).map(savedDeck => savedDeck.name)
+        };
+    },
+    getLearningWorkspace() {
+        library.metadata = library.metadata || createEmptyLibrary().metadata;
+        const workspace = library.metadata.learningWorkspace || { readings: [], listenings: [] };
+        return JSON.parse(JSON.stringify(workspace));
+    },
+    saveLearningWorkspace(workspace) {
+        library.metadata = library.metadata || createEmptyLibrary().metadata;
+        library.metadata.learningWorkspace = {
+            readings: Array.isArray(workspace?.readings) ? workspace.readings.slice(0, 200) : [],
+            listenings: Array.isArray(workspace?.listenings) ? workspace.listenings.slice(0, 200) : []
+        };
+        saveLibrary();
     },
     confirmCloudRestore(cloudPayload, cloudMetadata = {}) {
         let restoredLibrary;

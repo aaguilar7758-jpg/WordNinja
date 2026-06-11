@@ -1,10 +1,12 @@
-const CACHE_NAME = "wordninja-pages-v9";
+const CACHE_NAME = "wordninja-pages-v10";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./wordninja-utilities.css",
   "./wordninja.css",
+  "./lab.css",
   "./wordninja-app.js",
+  "./ninjalearn-app.js",
   "./cloud-sync.js",
   "./firebase-config.js",
   "./manifest.json",

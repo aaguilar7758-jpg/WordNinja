@@ -1,8 +1,10 @@
-# WordNinja
+# NinjaLearn
 
-WordNinja is a local-first spaced repetition flashcard app. It runs entirely as a static website with no build step.
+NinjaLearn is a local-first study workspace with WordNinja spaced repetition flashcards, a prompt library, structured study imports, reading practice, and listening practice. It runs entirely as a static website with no build step.
 
-Google sign-in and cloud backup are optional. WordNinja continues working locally and offline without Firebase. See [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) to enable cloud backup.
+Google sign-in and cloud backup are optional. NinjaLearn continues working locally and offline without Firebase. See [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) to enable cloud backup.
+
+The existing WordNinja library remains the primary data model. Existing decks, folders, review history, and schedules remain compatible, while ReadNinja and ListenNinja activities are included in the same local and cloud backup snapshot.
 
 ## Deploy With GitHub Pages
 
@@ -23,7 +25,9 @@ GitHub Pages may take a few minutes to publish after the first push.
 
 - `index.html`
 - `wordninja-app.js`
+- `ninjalearn-app.js`
 - `wordninja.css`
+- `lab.css`
 - `wordninja-utilities.css`
 - `manifest.json`
 - `service-worker.js`
@@ -36,6 +40,6 @@ GitHub Pages may take a few minutes to publish after the first push.
 
 ## Privacy
 
-WordNinja stores decks and review history inside each browser. Personal decks are not included in this repository. Backup JSON and exported deck files are ignored by Git.
+NinjaLearn stores decks, review history, and module activities inside each browser. Personal study data is not included in this repository. Backup JSON and exported deck files are ignored by Git.
 
 When optional cloud backup is enabled, the signed-in user's complete library snapshot is stored at `users/{uid}/library/current`.
