@@ -60,7 +60,7 @@ const ONBOARDING_STEPS = [
     {
         icon: '◎',
         title: 'Choose the right study mode',
-        message: 'Spaced Review updates long-term scheduling. Practice Deck, Learn Mode, and Preview help you study without changing due dates.'
+        message: 'Spaced Review updates long-term scheduling. Flashcard Practice, Learn Mode, and Preview help you study without changing due dates.'
     },
     {
         icon: '◷',
@@ -1064,9 +1064,11 @@ async function installWordNinja() {
 
 function registerPwa() {
     if (!globalThis.navigator?.serviceWorker || !['http:', 'https:'].includes(globalThis.location?.protocol)) return;
-    navigator.serviceWorker.register('./service-worker.js').catch(() => {
-        libraryStatus.textContent = 'Offline setup could not finish. WordNinja still works normally while connected.';
-    });
+    navigator.serviceWorker.register('./service-worker.js?v=20260611-3')
+        .then(registration => registration.update())
+        .catch(() => {
+            libraryStatus.textContent = 'Offline setup could not finish. WordNinja still works normally while connected.';
+        });
 }
 
 function openModal(options) {
@@ -1574,10 +1576,10 @@ function startStudyToday() {
     const dueItems = getDailyStudyItems();
 
     if (allDueItems.length === 0) {
-        libraryStatus.textContent = 'No cards are due right now. Use Practice Deck or Learn Mode if you want extra practice.';
+        libraryStatus.textContent = 'No cards are due right now. Use Flashcard Practice or Learn Mode if you want extra practice.';
         showConfirmModal({
             title: 'All caught up',
-            message: 'No cards are due today. You can still use Practice Deck or Learn Mode on any deck.',
+            message: 'No cards are due today. You can still use Flashcard Practice or Learn Mode on any deck.',
             confirmLabel: 'Got it',
             cancelLabel: 'Close',
             onConfirm: () => {}
@@ -1631,7 +1633,7 @@ function studySavedDeck(deckId, mode = 'due') {
 
     if (studyCards.length === 0) {
         libraryStatus.textContent = mode === 'due'
-            ? `"${savedDeck.name}" has no cards due right now. Use Practice Deck or Learn Mode for extra practice.`
+            ? `"${savedDeck.name}" has no cards due right now. Use Flashcard Practice or Learn Mode for extra practice.`
             : mode === 'preview'
                 ? `"${savedDeck.name}" has no cards yet. Open Cards to add one.`
                 : `"${savedDeck.name}" has no active cards. Unsuspend a card or use Preview to view the full deck.`;
@@ -2134,7 +2136,7 @@ function renderCardManager() {
     if (!cardManagerStatus.textContent) {
         cardManagerStatus.textContent = selectedCard
             ? selectedCard.suspended
-                ? 'Suspended cards stay in the deck but are excluded from Spaced Review, Study Today, Practice Deck, and Learn Mode.'
+                ? 'Suspended cards stay in the deck but are excluded from Spaced Review, Study Today, Flashcard Practice, and Learn Mode.'
                 : selectedCard.known
                     ? `Known cards remain active and are scheduled about ${KNOWN_INTERVAL_DAYS} days ahead.`
                     : selectedCard.reverseOf
@@ -2472,7 +2474,7 @@ function renderLibrary() {
     librarySummary.textContent = `${stats.folders} ${stats.folders === 1 ? 'folder' : 'folders'} / ${stats.decks} active ${stats.decks === 1 ? 'deck' : 'decks'} / ${stats.dueCards} due`;
     libraryStatus.textContent = stats.decks === 0
         ? 'Your library is ready. Import cards or load the safe demo deck to begin.'
-        : 'Spaced Review updates long-term scheduling. Practice Deck, Learn Mode, and Preview leave it untouched.';
+        : 'Choose Spaced Review for scheduling, or Flashcard Practice and Learn Mode for schedule-free studying.';
     renderManualDeckOptions();
 }
 
@@ -2543,7 +2545,11 @@ function createDeckRow(savedDeck) {
     studyButton.dataset.deckId = savedDeck.id;
     studyButton.disabled = savedDeck.archived || stats.dueCards === 0;
     studyButton.className = 'primary-button rounded-full px-4 py-2 text-sm font-semibold';
-    studyButton.textContent = savedDeck.archived ? 'Archived' : stats.dueCards > 0 ? `Spaced Review (${stats.dueCards})` : 'Nothing Due';
+    setStudyActionButtonContent(
+        studyButton,
+        savedDeck.archived ? 'Archived' : stats.dueCards > 0 ? `Spaced Review (${stats.dueCards})` : 'Nothing Due',
+        savedDeck.archived ? 'Restore this deck to study' : stats.dueCards > 0 ? 'Scheduled review with repeats' : 'No scheduled cards right now'
+    );
 
     const reviewButton = document.createElement('button');
     reviewButton.type = 'button';
@@ -2551,7 +2557,11 @@ function createDeckRow(savedDeck) {
     reviewButton.dataset.deckId = savedDeck.id;
     reviewButton.disabled = savedDeck.archived || stats.activeCards === 0;
     reviewButton.className = 'glass-button rounded-full border border-white/[0.08] px-4 py-2 text-sm font-medium text-gray-200';
-    reviewButton.textContent = savedDeck.archived ? 'Restore to Practice' : stats.activeCards > 0 ? 'Practice Deck' : 'No Active Cards';
+    setStudyActionButtonContent(
+        reviewButton,
+        savedDeck.archived ? 'Restore to Practice' : stats.activeCards > 0 ? 'Flashcard Practice' : 'No Active Cards',
+        savedDeck.archived ? 'Restore this deck first' : 'Full deck, no schedule changes'
+    );
 
     const learnButton = document.createElement('button');
     learnButton.type = 'button';
@@ -2559,7 +2569,7 @@ function createDeckRow(savedDeck) {
     learnButton.dataset.deckId = savedDeck.id;
     learnButton.disabled = savedDeck.archived || stats.activeCards === 0;
     learnButton.className = 'glass-button rounded-full border border-sky-300/10 bg-sky-300/[0.03] px-4 py-2 text-sm font-medium text-sky-100';
-    learnButton.textContent = 'Learn Mode';
+    setStudyActionButtonContent(learnButton, 'Learn Mode', 'Repeat until every card is known');
 
     const previewButton = document.createElement('button');
     previewButton.type = 'button';
@@ -2567,7 +2577,7 @@ function createDeckRow(savedDeck) {
     previewButton.dataset.deckId = savedDeck.id;
     previewButton.disabled = stats.totalCards === 0;
     previewButton.className = 'glass-button rounded-full border border-sky-300/10 bg-sky-300/[0.03] px-4 py-2 text-sm font-medium text-sky-100';
-    previewButton.textContent = 'Preview';
+    setStudyActionButtonContent(previewButton, 'Preview', 'Browse without recording answers');
 
     const manageButton = document.createElement('button');
     manageButton.type = 'button';
@@ -2580,6 +2590,21 @@ function createDeckRow(savedDeck) {
     studyActions.append(studyButton, learnButton, reviewButton, previewButton);
     row.append(topLine, statGrid, studyActions, manageButton);
     return row;
+}
+
+function setStudyActionButtonContent(button, title, subtitle) {
+    button.textContent = '';
+    button.classList.add('flex', 'min-w-0', 'flex-col', 'items-center', 'justify-center', 'leading-tight');
+
+    const titleEl = document.createElement('span');
+    titleEl.className = 'block max-w-full truncate';
+    titleEl.textContent = title;
+
+    const subtitleEl = document.createElement('span');
+    subtitleEl.className = 'mt-1 block max-w-full truncate text-[9px] font-medium opacity-55';
+    subtitleEl.textContent = subtitle;
+
+    button.append(titleEl, subtitleEl);
 }
 
 function createStatPill(label, value, valueClass) {
@@ -2637,7 +2662,7 @@ function renderCard() {
     studyModeLabel.textContent = activeStudyMode === 'due'
         ? 'Spaced Review'
         : activeStudyMode === 'all'
-            ? 'Practice Deck'
+            ? 'Flashcard Practice'
             : activeStudyMode === 'preview'
                 ? 'Preview'
                 : activeStudyMode === 'today'
