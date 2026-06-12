@@ -403,14 +403,25 @@
 
 @media (max-width: 520px) {
     .lab-nav {
+        display: flex;
         position: static;
+        overflow-x: auto;
         padding: 0.4rem;
         gap: 0.35rem;
+        scrollbar-width: none;
+        scroll-snap-type: x proximity;
+    }
+
+    .lab-nav::-webkit-scrollbar {
+        display: none;
     }
 
     .lab-nav-button {
+        min-width: max-content;
+        flex: 0 0 auto;
         padding: 0.68rem 0.55rem;
         font-size: 0.72rem;
+        scroll-snap-align: start;
     }
 
     .dashboard-actions {
