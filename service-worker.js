@@ -1,4 +1,4 @@
-const CACHE_NAME = "wordninja-pages-v12";
+const CACHE_NAME = "wordninja-pages-v13";
 const CORE_ASSETS = [
   "./",
   "./index.html",

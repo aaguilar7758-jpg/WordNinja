@@ -11,7 +11,7 @@
     <link rel="apple-touch-icon" href="./wordninja-icon-192.png">
     <link rel="stylesheet" href="./wordninja-utilities.css">
     <link rel="stylesheet" href="./wordninja.css?v=20260611-5">
-    <link rel="stylesheet" href="./lab.css?v=4">
+    <link rel="stylesheet" href="./lab.css?v=5">
 </head>
 <body class="text-gray-200">
     <div class="aurora-mesh"></div>
@@ -51,35 +51,44 @@
 
             <section id="dashboardView" class="ninja-view w-full flex-1">
                 <div class="dashboard-hero glass-panel">
-                    <p class="lab-eyebrow">Your study dashboard</p>
-                    <h2>What do you want to study today?</h2>
-                    <p>Start with due cards, import new material, or open a focused study tool.</p>
+                    <p class="lab-eyebrow">Continue learning</p>
+                    <h2>Pick up where you left off</h2>
+                    <p>Reviews and recent activities come first. Create something new when you are ready.</p>
                 </div>
 
-                <div class="dashboard-actions">
+                <div class="dashboard-actions dashboard-continue-actions">
                     <button id="dashboardReviewBtn" type="button" class="dashboard-action is-primary">
                         <span class="dashboard-action-icon">◎</span>
                         <span><strong>Review Due Cards</strong><small><span id="dashboardDueCount">0</span> ready now</small></span>
                     </button>
-                    <button type="button" data-dashboard-action="import" class="dashboard-action">
-                        <span class="dashboard-action-icon">＋</span>
-                        <span><strong>Import Study Material</strong><small>Create or add to a deck</small></span>
+                    <button id="dashboardResumeReadingBtn" type="button" class="dashboard-action">
+                        <span class="dashboard-action-icon">文</span>
+                        <span><strong>Resume Reading</strong><small id="dashboardReadingStatus">No reading activity yet</small></span>
                     </button>
-                    <button type="button" data-dashboard-action="decks" class="dashboard-action">
-                        <span class="dashboard-action-icon">▤</span>
-                        <span><strong>Open Decks</strong><small><span id="dashboardDeckCount">0</span> active decks</small></span>
-                    </button>
-                    <button type="button" data-dashboard-action="prompts" class="dashboard-action">
-                        <span class="dashboard-action-icon">✦</span>
-                        <span><strong>Use Prompt Library</strong><small>Convert notes with ChatGPT</small></span>
+                    <button id="dashboardResumeListeningBtn" type="button" class="dashboard-action">
+                        <span class="dashboard-action-icon">▶</span>
+                        <span><strong>Resume Listening</strong><small id="dashboardListeningStatus">No listening activity yet</small></span>
                     </button>
                 </div>
 
                 <div class="dashboard-grid">
                     <section class="glass-panel dashboard-panel">
+                        <div>
+                            <p class="lab-eyebrow">Create new study material</p>
+                            <h3 class="mt-1 text-lg font-medium text-white">Start something new</h3>
+                        </div>
+                        <div class="dashboard-create-actions">
+                            <button type="button" data-dashboard-action="import"><strong>Import</strong><small>Create or add to a deck</small></button>
+                            <button type="button" data-dashboard-action="prompts"><strong>Prompt Library</strong><small>Convert notes into structured material</small></button>
+                            <button type="button" data-ninja-view="read"><strong>New Reading</strong><small>Build passage and cloze practice</small></button>
+                            <button type="button" data-ninja-view="listen"><strong>New Listening</strong><small>Create sentence replay practice</small></button>
+                        </div>
+                    </section>
+
+                    <section class="glass-panel dashboard-panel">
                         <div class="lab-section-heading">
                             <div><p class="lab-eyebrow">Progress</p><h3>Study overview</h3></div>
-                            <button type="button" data-ninja-view="wordninja" class="glass-button rounded-full border border-white/[0.08] px-4 py-2 text-xs">Open WordNinja</button>
+                            <button type="button" data-dashboard-action="decks" class="glass-button rounded-full border border-white/[0.08] px-4 py-2 text-xs">Open <span id="dashboardDeckCount">0</span> Decks</button>
                         </div>
                         <div class="dashboard-stat-grid">
                             <div><span id="dashboardReviewedCount">0</span><small>Reviewed today</small></div>
@@ -89,17 +98,8 @@
                         <div id="dashboardDeckPreview" class="dashboard-deck-preview">Your active decks will appear here.</div>
                     </section>
 
-                    <section class="glass-panel dashboard-panel">
-                        <p class="lab-eyebrow">More ways to learn</p>
-                        <h3 class="mt-1 text-lg font-medium text-white">Focused practice</h3>
-                        <div class="dashboard-secondary-actions">
-                            <button type="button" data-ninja-view="read"><strong>ReadNinja</strong><small>Passages, cloze, and comprehension</small></button>
-                            <button type="button" data-ninja-view="listen"><strong>ListenNinja</strong><small>Scripts and browser speech practice</small></button>
-                            <button type="button" data-ninja-view="import-lab"><strong>Import Lab</strong><small>Paste structured study output</small></button>
-                        </div>
-                        <p class="dashboard-cloud-summary">Cloud: <span id="dashboardCloudStatus">Local mode</span></p>
-                    </section>
                 </div>
+                <p class="dashboard-cloud-summary">Cloud: <span id="dashboardCloudStatus">Local mode</span></p>
             </section>
 
             <section id="importView" class="grid w-full flex-1 gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.85fr)]">
@@ -404,6 +404,7 @@
                         <p class="lab-eyebrow">Detected Content</p>
                         <h3 id="labImportTitle">Nothing analyzed yet</h3>
                         <p id="labImportSummary" class="lab-muted">The detected format and available actions will appear here.</p>
+                        <div id="labDetectionGrid" class="lab-detection-grid hidden"></div>
                         <div id="labImportPreview" class="lab-preview"></div>
                         <div id="labImportActions" class="lab-action-row hidden">
                             <button id="sendFlashcardsBtn" type="button" class="primary-button rounded-full px-5 py-2.5 text-sm font-semibold">Send to WordNinja</button>
@@ -429,6 +430,29 @@
                         <div id="readingLibrary" class="lab-library"></div>
                     </div>
                 </div>
+                <section id="readingPracticePanel" class="glass-panel lab-panel lab-practice-panel hidden">
+                    <div class="lab-section-heading">
+                        <div><p class="lab-eyebrow">Reading mode</p><h2 id="readingPracticeTitle">Reading practice</h2></div>
+                        <button id="closeReadingPracticeBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-4 py-2 text-xs">Close Practice</button>
+                    </div>
+                    <div class="reading-practice-grid">
+                        <div>
+                            <div class="practice-progress"><span id="readingSentenceProgress">Sentence 0 of 0</span><span id="readingDifficultCount">0 difficult</span></div>
+                            <button id="readingSentenceCard" type="button" class="reading-sentence-card">Open a saved reading activity to begin.</button>
+                            <div class="lab-action-row">
+                                <button id="previousReadingSentenceBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-4 py-2 text-sm">Previous</button>
+                                <button id="toggleDifficultSentenceBtn" type="button" class="glass-button rounded-full border border-amber-300/15 px-4 py-2 text-sm text-amber-100">Mark Difficult</button>
+                                <button id="nextReadingSentenceBtn" type="button" class="primary-button rounded-full px-5 py-2 text-sm font-semibold">Reveal Next</button>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="lab-eyebrow">Cloze practice</p>
+                            <div id="readingClozePractice" class="cloze-practice-list">No cloze questions in this activity.</div>
+                            <p class="lab-eyebrow mt-4">Comprehension</p>
+                            <div id="readingQuestionPractice" class="question-practice-list">No comprehension questions in this activity.</div>
+                        </div>
+                    </div>
+                </section>
             </section>
 
             <section id="listenNinjaView" class="ninja-view hidden">
@@ -446,6 +470,13 @@
                             <button id="saveListeningBtn" type="button" class="glass-button rounded-full border border-sky-300/10 px-5 py-2.5 text-sm">Save Activity</button>
                         </div>
                         <div id="listeningTranscript" class="lab-transcript">Enter a script to begin.</div>
+                        <div id="listeningSegments" class="listening-segments"></div>
+                        <div class="lab-action-row">
+                            <button id="previousListeningSegmentBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-4 py-2 text-sm">Previous Sentence</button>
+                            <button id="repeatListeningSegmentBtn" type="button" class="primary-button rounded-full px-5 py-2 text-sm font-semibold">Repeat Sentence</button>
+                            <button id="nextListeningSegmentBtn" type="button" class="glass-button rounded-full border border-white/[0.08] px-4 py-2 text-sm">Next Sentence</button>
+                        </div>
+                        <p id="listeningSegmentProgress" class="lab-muted">Sentence 0 of 0</p>
                     </div>
                     <div class="glass-panel lab-panel">
                         <div class="lab-section-heading"><div><p class="lab-eyebrow">Listening Library</p><h3>Saved activities</h3></div><button id="clearListeningsBtn" type="button" class="glass-button rounded-full border border-red-300/10 px-4 py-2 text-xs text-red-200">Clear All</button></div>
@@ -653,6 +684,6 @@
 
     <script src="./wordninja-app.js?v=20260612-1" defer></script>
     <script type="module" src="./cloud-sync.js?v=2"></script>
-    <script src="./ninjalearn-app.js?v=1" defer></script>
+    <script src="./ninjalearn-app.js?v=2" defer></script>
 </body>
 </html>

@@ -6,6 +6,8 @@ Google sign-in and cloud backup are optional. NinjaLearn continues working local
 
 The existing WordNinja library remains the primary data model. Existing decks, folders, review history, and schedules remain compatible, while ReadNinja and ListenNinja activities are included in the same local and cloud backup snapshot.
 
+ReadNinja includes resumable sentence-by-sentence reading, difficult-sentence marking, and cloze practice. ListenNinja splits scripts into replayable sentences with previous, repeat, next, speed, and transcript controls.
+
 ## Deploy With GitHub Pages
 
 1. Create a new GitHub repository.
